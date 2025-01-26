@@ -50,6 +50,9 @@ open class CounterStrikeGrenadeItem(properties: Properties) : Item(properties) {
             GrenadeThrowType.Strong -> STRONG_THROW_PLAYER_SPEED_FACTOR
             GrenadeThrowType.Weak -> WEAK_THROW_PLAYER_SPEED_FACTOR
         }
+        if (!player.isCreative) {
+            player.inventory.getSelected().count -= 1
+        }
 
         val speed = player.deltaMovement.scale(playerSpeedFactor)
             .add(player.lookAngle.normalize().scale(throwType.speed))
@@ -74,7 +77,7 @@ object PlayerInteractEventHandler {
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (!event.level.isClientSide) return
-        if (Duration.between(this.grenadeLastThrow,Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
+        if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
 
         val itemInHand = event.entity.getItemInHand(event.hand).item
         if (itemInHand !is CounterStrikeGrenadeItem) return
