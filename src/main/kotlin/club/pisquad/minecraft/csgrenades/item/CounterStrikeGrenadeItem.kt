@@ -76,24 +76,17 @@ object PlayerInteractEventHandler {
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (!event.level.isClientSide) return
-        if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
 
         val itemInHand = event.entity.getItemInHand(event.hand).item
         if (itemInHand !is CounterStrikeGrenadeItem) return
 
-        val player = Minecraft.getInstance().player!!
-        if (!player.isCreative) {
-            when (event.hand) {
-                InteractionHand.MAIN_HAND -> {
-                    player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY)
-                }
-
-                InteractionHand.OFF_HAND -> {
-                    player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
-                }
-            }
+        if (!event.entity.isCreative) {
+            event.entity.inventory.removeItem(event.itemStack)
         }
+
+        if (!event.level.isClientSide) return
+        if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
+
 
         when (event) {
             is PlayerInteractEvent.LeftClickBlock, is PlayerInteractEvent.LeftClickEmpty -> {
