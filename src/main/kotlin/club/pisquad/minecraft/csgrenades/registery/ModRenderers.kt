@@ -2,11 +2,9 @@ package club.pisquad.minecraft.csgrenades.registery
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades.Logger
-import club.pisquad.minecraft.csgrenades.render.FlashBangEffect
 import net.minecraft.client.renderer.entity.EntityRenderers
 import net.minecraft.client.renderer.entity.ThrownItemRenderer
 import net.minecraftforge.client.event.EntityRenderersEvent
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 
@@ -22,8 +20,5 @@ object ModRenderers {
         EntityRenderers.register(ModEntities.SMOKE_GRENADE_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.HEGRENADE_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.INCENDIARY_ENTITY.get(), ::ThrownItemRenderer)
-
-        MinecraftForge.EVENT_BUS.register(FlashBangEffect::class)
-
     }
 }

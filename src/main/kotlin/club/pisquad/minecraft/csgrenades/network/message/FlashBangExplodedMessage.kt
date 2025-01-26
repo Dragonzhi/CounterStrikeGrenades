@@ -1,18 +1,15 @@
 package club.pisquad.minecraft.csgrenades.network.message
 
-import club.pisquad.minecraft.csgrenades.render.FlashBangEffect
-import club.pisquad.minecraft.csgrenades.render.FlashBangEffectData
+import club.pisquad.minecraft.csgrenades.render.FlashbangEffectData
+import club.pisquad.minecraft.csgrenades.render.FlashbangEffectRenderer
 import club.pisquad.minecraft.csgrenades.serializer.Vec3Serializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import net.minecraft.client.Minecraft
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.world.phys.Vec3
 import net.minecraftforge.network.NetworkEvent
 import java.util.function.Supplier
-import kotlin.math.PI
-import kotlin.math.acos
 
 //private val Logger: Logger = LogManager.getLogger(CounterStrikeGrenades.ID + ":message:flashbangExplodedMessage")
 
@@ -41,21 +38,9 @@ class FlashBangExplodedMessage(
                 return
             }
 
-            val player = Minecraft.getInstance().player ?: return
-            val flashbangEntity = Minecraft.getInstance().level?.getEntity(msg.entityId) ?: return
-
-            val playerToFlashVec = msg.position.add(player.position().reverse())
-
-            val angle = acos(player.lookAngle.dot(playerToFlashVec.normalize())).times(180).times(1 / PI)
-
-            // Flashbang effect
-            FlashBangEffect.render(
-                FlashBangEffectData.create(
-                    flashbangEntity,
-                    angle,
-                    playerToFlashVec.length(),
-                    msg.position,
-                    player.position().add(Vec3(0.0, 1.62, 0.0))
+            FlashbangEffectRenderer.render(
+                FlashbangEffectData.create(
+                    msg.position
                 )
             )
         }
