@@ -2,7 +2,6 @@ package club.pisquad.minecraft.csgrenades.item
 
 import club.pisquad.minecraft.csgrenades.*
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
-import club.pisquad.minecraft.csgrenades.helper.TickHelper
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.network.message.GrenadeThrowType
 import club.pisquad.minecraft.csgrenades.network.message.GrenadeThrownMessage
@@ -19,6 +18,8 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
+import java.time.Duration
+import java.time.Instant
 
 private var drawSoundPlayedSlot: Int = -1
 
@@ -68,16 +69,12 @@ open class CounterStrikeGrenadeItem(properties: Properties) : Item(properties) {
 
 @Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
 object PlayerInteractEventHandler {
-    private const val TICK_HELPER_KEY = "GRENADE_THROW_COOLDOWN"
-
-    init {
-        TickHelper.create(TICK_HELPER_KEY)
-    }
+    private var grenadeLastThrow = Instant.now()
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (!event.level.isClientSide) return
-        if (TickHelper.get(TICK_HELPER_KEY) < GRENADE_THROW_COOLDOWN) return
+        if (Duration.between(this.grenadeLastThrow,Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
 
         val itemInHand = event.entity.getItemInHand(event.hand).item
         if (itemInHand !is CounterStrikeGrenadeItem) return
@@ -92,6 +89,6 @@ object PlayerInteractEventHandler {
                 itemInHand.throwAction(event.entity, GrenadeThrowType.Weak)
             }
         }
-        TickHelper.reset(TICK_HELPER_KEY)
+        this.grenadeLastThrow = Instant.now()
     }
 }
