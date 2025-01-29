@@ -3,24 +3,19 @@ package club.pisquad.minecraft.csgrenades.entity
 import club.pisquad.minecraft.csgrenades.*
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
-import club.pisquad.minecraft.csgrenades.network.message.IncendiaryExplodedMessage
+import club.pisquad.minecraft.csgrenades.network.message.IncendiaryMessage
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
-import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.ai.targeting.TargetingConditions
-import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.network.PacketDistributor
 
 class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
@@ -64,7 +59,10 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
         if (!this.entityData.get(isExplodedAccessor) && getTimeFromTickCount(this.tickCount.toDouble()) > INCENDIARY_FUSE_TIME) {
             this.entityData.set(isExplodedAccessor, true)
             this.poppedInAir = true
-            sendExplodedMessage()
+            CsGrenadePacketHandler.INSTANCE.send(
+                PacketDistributor.ALL.noArg(),
+                IncendiaryMessage(IncendiaryMessage.MessageType.AirExploded, this.position())
+            )
             this.kill()
         }
     }
@@ -91,24 +89,24 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
                 if (size > 0) {
                     this.extinguished = true
                 }
-                sendExplodedMessage()
+                CsGrenadePacketHandler.INSTANCE.send(
+                    PacketDistributor.ALL.noArg(),
+                    IncendiaryMessage(
+                        IncendiaryMessage.MessageType.GroundExploded, this.position()
+                    )
+                )
                 return
             }
         }
         super.onHitBlock(result)
-
-
-    }
-
-    fun sendExplodedMessage() {
-        CsGrenadePacketHandler.INSTANCE.send(
-            PacketDistributor.ALL.noArg(),
-            IncendiaryExplodedMessage(this.id, this.extinguished, poppedInAir, this.position())
-        )
     }
 
     fun extinguish() {
         this.extinguished = true
+        CsGrenadePacketHandler.INSTANCE.send(
+            PacketDistributor.ALL.noArg(),
+            IncendiaryMessage(IncendiaryMessage.MessageType.ExtinguishedBySmoke, this.position())
+        )
         this.kill()
     }
 }

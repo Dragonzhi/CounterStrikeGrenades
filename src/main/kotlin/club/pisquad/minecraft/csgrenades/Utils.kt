@@ -1,5 +1,6 @@
 package club.pisquad.minecraft.csgrenades
 
+import club.pisquad.minecraft.csgrenades.entity.CounterStrikeGrenadeEntity
 import club.pisquad.minecraft.csgrenades.entity.SmokeGrenadeEntity
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
@@ -65,5 +66,5 @@ fun isPositionInSmoke(pos: BlockPos, radius: Double): Boolean {
     return level.getEntitiesOfClass(
         SmokeGrenadeEntity::class.java,
         AABB(pos).inflate(radius)
-    ).isNotEmpty()
+    ).filter { it.entityData.get(CounterStrikeGrenadeEntity.isExplodedAccessor) }.isNotEmpty()
 }
