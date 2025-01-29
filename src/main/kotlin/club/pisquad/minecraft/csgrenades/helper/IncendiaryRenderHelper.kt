@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
+import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.RandomSource
@@ -42,6 +43,7 @@ private class IncendiaryRenderer(
     val data: IncendiaryExplodedMessage
 ) {
     val soundInstance: SoundInstance
+    val randomSource: RandomSource = RandomSource.createNewThreadLocalInstance()
     var tickCount = 0
 
     init {
@@ -92,17 +94,25 @@ private class IncendiaryRenderer(
         val particleEngine = Minecraft.getInstance().particleEngine
         val particleCount = (INCENDIARY_RANGE * INCENDIARY_RANGE * INCENDIARY_PARTICLE_DENSITY).toInt()
 
-        repeat(particleCount) {
+        for (i in 0 until particleCount) {
             val pos = getRandomLocationFromCircle(
                 Vec2(data.position.x.toFloat(), data.position.z.toFloat()),
                 INCENDIARY_RANGE
             )
+            if (isPositionInSmoke(
+                    BlockPos(pos.x.toInt(), data.position.y.toInt(), pos.y.toInt()),
+                    SMOKE_GRENADE_RADIUS.toDouble()
+                )
+            ) {
+                continue
+            }
+
             val distance = Vec2(
                 data.position.x.minus(pos.x).toFloat(),
                 data.position.z.minus(pos.y).toFloat()
             ).length().toDouble()
 
-            val random = RandomSource.createNewThreadLocalInstance().nextDouble()
+            val random = randomSource.nextDouble()
             val particleType = when {
                 random < 0.2 -> ParticleTypes.SMOKE
                 random < 0.5 -> ParticleTypes.FLAME

@@ -6,15 +6,21 @@ import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.network.message.IncendiaryExplodedMessage
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
+import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.ai.targeting.TargetingConditions
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.network.PacketDistributor
 
 class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
@@ -41,7 +47,11 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
             val level = this.level() as ServerLevel
             for (player in level.players()) {
                 val distance = player.distanceTo(this).toDouble()
-                if (distance < INCENDIARY_RANGE) {
+                if (distance < INCENDIARY_RANGE && !isPositionInSmoke(
+                        BlockPos(player.position().toVec3i()),
+                        SMOKE_GRENADE_RADIUS.toDouble()
+                    )
+                ) {
                     player.hurt(player.damageSources().generic(), 2.5f)
                 }
             }
@@ -101,5 +111,4 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
         this.extinguished = true
         this.kill()
     }
-
 }

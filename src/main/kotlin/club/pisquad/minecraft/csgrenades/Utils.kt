@@ -1,5 +1,8 @@
 package club.pisquad.minecraft.csgrenades
 
+import club.pisquad.minecraft.csgrenades.entity.SmokeGrenadeEntity
+import net.minecraft.client.Minecraft
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
 import net.minecraft.util.RandomSource
 import net.minecraft.world.phys.AABB
@@ -54,4 +57,13 @@ fun getFireExtinguishRange(center: Vec3): AABB {
         center.y + FIRE_EXTINGUISH_RANGE,
         center.z + FIRE_EXTINGUISH_RANGE,
     )
+}
+
+fun isPositionInSmoke(pos: BlockPos, radius: Double): Boolean {
+    val level = Minecraft.getInstance().level ?: return false
+
+    return level.getEntitiesOfClass(
+        SmokeGrenadeEntity::class.java,
+        AABB(pos).inflate(radius)
+    ).isNotEmpty()
 }
