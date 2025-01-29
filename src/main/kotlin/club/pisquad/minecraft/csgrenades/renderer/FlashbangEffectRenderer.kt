@@ -52,10 +52,10 @@ data class FlashbangEffectData(
 
             val totalEffectTime = max(
                 0.0, when (angle) {
-                    in 0.0..53.0 -> 4.87
-                    in 53.0..72.0 -> 3.4
-                    in 72.0..101.0 -> 1.95
-                    in 101.0..180.0 -> 0.95
+                    in 0.0..53.0 -> 4.0
+                    in 53.0..72.0 -> 3.0
+                    in 72.0..101.0 -> 1.5
+                    in 101.0..180.0 -> 0.5
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
@@ -63,7 +63,7 @@ data class FlashbangEffectData(
             return FlashbangEffectData(
                 position = flashbangPos,
                 effectAttack = 20,
-                effectAmount = 150,
+                effectAmount = 30,
                 effectSustain = (fullyBlindedTime * 1000).toInt(),
                 effectDecay = ((totalEffectTime - fullyBlindedTime) * 1000).toInt()
             )
