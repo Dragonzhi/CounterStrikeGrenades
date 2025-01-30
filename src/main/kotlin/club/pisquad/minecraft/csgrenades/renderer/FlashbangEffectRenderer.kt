@@ -158,6 +158,9 @@ object FlashbangEffectRenderer {
 
     @SubscribeEvent
     fun eventHandler(event: RenderGuiOverlayEvent.Post) {
+        val player = Minecraft.getInstance().player ?: return
+        if (player.isSpectator) return
+
         val currentTime = Instant.now()
         // Converting type to double for precise calculation
         val timeDelta = Duration.between(renderStartTime, currentTime).toMillis().toDouble()
