@@ -1,4 +1,4 @@
-package club.pisquad.minecraft.csgrenades.renderer
+package club.pisquad.minecraft.csgrenades.client.renderer
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.SoundTypes
