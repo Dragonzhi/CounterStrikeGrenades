@@ -1,6 +1,8 @@
 package club.pisquad.minecraft.csgrenades.item
 
-import club.pisquad.minecraft.csgrenades.*
+import club.pisquad.minecraft.csgrenades.PLAYER_EYESIGHT_OFFSET
+import club.pisquad.minecraft.csgrenades.STRONG_THROW_PLAYER_SPEED_FACTOR
+import club.pisquad.minecraft.csgrenades.WEAK_THROW_PLAYER_SPEED_FACTOR
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.network.message.GrenadeThrowType
@@ -15,13 +17,6 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.common.Mod
-import java.time.Duration
-import java.time.Instant
 
 private var drawSoundPlayedSlot: Int = -1
 
@@ -67,39 +62,5 @@ open class CounterStrikeGrenadeItem(properties: Properties) : Item(properties.st
                 Rotations(player.xRot, player.yRot, 0.0f),
             )
         )
-    }
-}
-
-@OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
-object PlayerInteractEventHandler {
-    private var grenadeLastThrow = Instant.now()
-
-    @SubscribeEvent
-    fun onPlayerInteract(event: PlayerInteractEvent) {
-        val itemInHand = event.entity.getItemInHand(event.hand).item
-        if (itemInHand !is CounterStrikeGrenadeItem) return
-        if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
-
-        if (event.level.isClientSide) {
-            when (event) {
-                is PlayerInteractEvent.LeftClickBlock,
-                is PlayerInteractEvent.LeftClickEmpty -> {
-                    itemInHand.throwAction(event.entity, event.hand, GrenadeThrowType.Strong)
-                }
-
-                is PlayerInteractEvent.RightClickItem,
-                is PlayerInteractEvent.RightClickBlock,
-                is PlayerInteractEvent.EntityInteract -> {
-                    // note that PlayerInteractEvent.EntityInteract fires when player right-clicks an entity
-                    itemInHand.throwAction(event.entity, event.hand, GrenadeThrowType.Weak)
-                }
-            }
-            if (!event.entity.isCreative) {
-                event.entity.inventory.removeItem(event.itemStack)
-            }
-            this.grenadeLastThrow = Instant.now()
-        }
-
     }
 }

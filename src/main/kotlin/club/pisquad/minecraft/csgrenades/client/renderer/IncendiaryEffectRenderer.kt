@@ -1,4 +1,4 @@
-package club.pisquad.minecraft.csgrenades.renderer
+package club.pisquad.minecraft.csgrenades.client.renderer
 
 import club.pisquad.minecraft.csgrenades.*
 import club.pisquad.minecraft.csgrenades.entity.CounterStrikeGrenadeEntity.Companion.isExplodedAccessor
