@@ -1,5 +1,28 @@
 package club.pisquad.minecraft.csgrenades
 
+import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
+import club.pisquad.minecraft.csgrenades.network.message.SettingsChangeMessage
+import kotlinx.serialization.Serializable
+import net.minecraftforge.network.PacketDistributor
+
+@Serializable
+data class CsGrenadeConfig(
+    var ignoreBarrierBlock: Boolean = false
+)
+
+object CsGrenadeConfigManager {
+    var config: CsGrenadeConfig = CsGrenadeConfig()
+
+    fun update(config: CsGrenadeConfig) {
+        this.config = config
+        CsGrenadePacketHandler.INSTANCE.send(
+            PacketDistributor.ALL.noArg(),
+            SettingsChangeMessage(config)
+        )
+    }
+
+}
+
 const val PLAYER_EYESIGHT_OFFSET = 1.62
 const val GRENADE_THROW_COOLDOWN = 1000
 const val GRENADE_ENTITY_SIZE = 0.3f

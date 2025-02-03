@@ -1,7 +1,9 @@
 package club.pisquad.minecraft.csgrenades
 
+import club.pisquad.minecraft.csgrenades.command.ModCommands
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.registery.*
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -34,6 +36,7 @@ object CounterStrikeGrenades {
         ModSoundEvents.register(KotlinModLoadingContext.get().getKEventBus())
         ModParticles.PARTICLE_TYPES.register(KotlinModLoadingContext.get().getKEventBus())
         CsGrenadePacketHandler.registerMessage()
+        MinecraftForge.EVENT_BUS.register(ModCommands)
     }
 
     /**

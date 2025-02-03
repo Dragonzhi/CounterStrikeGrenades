@@ -1,9 +1,10 @@
 package club.pisquad.minecraft.csgrenades.network
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
+import club.pisquad.minecraft.csgrenades.network.message.FireGrenadeMessage
 import club.pisquad.minecraft.csgrenades.network.message.FlashBangExplodedMessage
 import club.pisquad.minecraft.csgrenades.network.message.GrenadeThrownMessage
-import club.pisquad.minecraft.csgrenades.network.message.FireGrenadeMessage
+import club.pisquad.minecraft.csgrenades.network.message.SettingsChangeMessage
 import net.minecraft.resources.ResourceLocation
 import net.minecraftforge.network.NetworkDirection
 import net.minecraftforge.network.NetworkEvent
@@ -26,11 +27,6 @@ object CsGrenadePacketHandler {
         ResourceLocation(CounterStrikeGrenades.ID, "event"), { PROTOCOL_VERSION },
         PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals
     )
-
-    fun handle(message: GrenadeThrownMessage, ctx: Supplier<NetworkEvent.Context>) {
-//        Logger.info("Received message $message")
-
-    }
 
     @Suppress("INACCESSIBLE_TYPE")
     fun registerMessage() {
@@ -56,6 +52,14 @@ object CsGrenadePacketHandler {
             FireGrenadeMessage::encoder,
             FireGrenadeMessage::decoder,
             FireGrenadeMessage::handler,
+        )
+
+        INSTANCE.registerMessage(
+            messageTypeCount,
+            SettingsChangeMessage::class.java,
+            SettingsChangeMessage::encoder,
+            SettingsChangeMessage::decoder,
+            SettingsChangeMessage::handler
         )
     }
 }

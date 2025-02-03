@@ -1,5 +1,6 @@
 package club.pisquad.minecraft.csgrenades.entity
 
+import club.pisquad.minecraft.csgrenades.CsGrenadeConfigManager
 import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.BarrierBlock
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
@@ -82,7 +84,11 @@ abstract class CounterStrikeGrenadeEntity(
      * @param result The block hit result.
      */
     override fun onHitBlock(result: BlockHitResult) {
-//        logger.info("Grenade[@$this] hit block at ${result.blockPos}")
+        if (CsGrenadeConfigManager.config.ignoreBarrierBlock && this.level()
+                .getBlockState(result.blockPos).block is BarrierBlock
+        ) {
+            return
+        }
 
         this.setPos(this.xOld, this.yOld, this.zOld)
 
