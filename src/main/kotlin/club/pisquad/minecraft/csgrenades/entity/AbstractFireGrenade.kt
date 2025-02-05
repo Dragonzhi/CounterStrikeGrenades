@@ -8,6 +8,7 @@ import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.level.Level
@@ -36,17 +37,7 @@ abstract class AbstractFireGrenade(
         if (this.level() is ClientLevel) return
         if (this.entityData.get(isExplodedAccessor)) {
             // Damage players within range
-            val level = this.level() as ServerLevel
-            for (player in level.players()) {
-                val distance = player.distanceTo(this).toDouble()
-                if (distance < FIREGRENADE_RANGE && !isPositionInSmoke(
-                        player.position(),
-                        SMOKE_GRENADE_RADIUS.toDouble()
-                    )
-                ) {
-                    player.hurt(player.damageSources().generic(), 2.5f)
-                }
-            }
+            this.doDamage()
 
             if (getTimeFromTickCount((this.tickCount - this.explosionTick).toDouble()) > FIREGRENADE_LIFETIME) {
                 this.kill()
@@ -105,5 +96,25 @@ abstract class AbstractFireGrenade(
             FireGrenadeMessage(FireGrenadeMessage.MessageType.ExtinguishedBySmoke, this.position())
         )
         this.kill()
+    }
+
+    abstract fun getDamageSource(): DamageSource
+
+    private fun doDamage() {
+        //Should only be run on the server
+        val level = this.level() as ServerLevel
+        val damageSource = this.getDamageSource()
+        for (player in level.players()) {
+            val distance = player.distanceTo(this).toDouble()
+            if (distance < FIREGRENADE_RANGE && !isPositionInSmoke(
+                    player.position(),
+                    SMOKE_GRENADE_RADIUS.toDouble()
+                )
+            ) {
+                val playerMovement = player.deltaMovement
+                player.hurt(damageSource, 3f)
+                player.deltaMovement = playerMovement
+            }
+        }
     }
 }

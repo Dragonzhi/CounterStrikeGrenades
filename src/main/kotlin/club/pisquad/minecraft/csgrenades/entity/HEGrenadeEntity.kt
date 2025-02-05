@@ -6,9 +6,12 @@ import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.getTimeFromTickCount
 import club.pisquad.minecraft.csgrenades.helper.HEGrenadeExplosionData
 import club.pisquad.minecraft.csgrenades.helper.HEGrenadeRenderHelper
+import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
+import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
@@ -28,17 +31,9 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
     override fun tick() {
         super.tick()
 
-
         if (getTimeFromTickCount(this.tickCount.toDouble()) > 2.5 && !this.entityData.get(isExplodedAccessor)) {
-
             if (this.level() is ServerLevel) {
-                val level = this.level() as ServerLevel
-                for (player in level.players()) {
-                    val distance = player.distanceTo(this).toDouble()
-                    if (distance < HEGRENADE_DAMAGE_RANGE) {
-                        player.hurt(player.damageSources().generic(), calculateHEGrenadeDamage(distance, 0.0).toFloat())
-                    }
-                }
+                this.doDamage()
             } else {
                 HEGrenadeRenderHelper.render(HEGrenadeExplosionData(this.position()))
             }
@@ -50,10 +45,27 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
             }
         }
     }
+
+    private fun doDamage() {
+        val level = this.level()
+        val registryAccess = this.level().registryAccess()
+        val damageSource = DamageSource(
+            registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_EXPLOSION_DAMAGE),
+            this.owner
+        )
+        for (player in level.players()) {
+            val distance = player.distanceTo(this).toDouble()
+
+            if (distance < HEGRENADE_DAMAGE_RANGE) {
+                val playerMovement = player.deltaMovement
+                player.hurt(damageSource, calculateHEGrenadeDamage(distance, 0.0).toFloat())
+                player.deltaMovement = playerMovement
+            }
+        }
+    }
 }
 
 private fun calculateHEGrenadeDamage(distance: Double, armorReduction: Double): Double {
     return HEGRENADE_BASE_DAMAGE.times(1.0.minus(distance.div(HEGRENADE_DAMAGE_RANGE)))
         .times(1.0.minus(armorReduction))
-
 }

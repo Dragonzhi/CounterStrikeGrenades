@@ -4,5 +4,8 @@
   "item.csgrenades.smokegrenade": "Smoke Grenade",
   "item.csgrenades.hegrenade": "HE Grenade",
   "item.csgrenades.incendiary": "Incendiary",
-  "item.csgrenades.molotov": "Molotov"
+  "item.csgrenades.molotov": "Molotov",
+  "death.attack.csgrenade.hegrenade_explosion": "%1$s was blown up by %2$s",
+  "death.attack.csgrenade.incendiary_fire": "%1$s was cooked by %2$s",
+  "death.attack.csgrenade.molotov_fire": "%1$s was cooked by %2$s"
 }

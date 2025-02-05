@@ -1,0 +1,6 @@
+{
+  "message_id": "csgrenade.molotov_fire",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "death_message_type": "default"
+}
