@@ -54,7 +54,16 @@ const val INCENDIARY_PARTICLE_DENSITY = 1
 const val INCENDIARY_PARTICLE_LIFETIME = 30
 const val FIRE_EXTINGUISH_RANGE = SMOKE_GRENADE_RADIUS
 
-// Objectives key
-const val KILLCOUNT_HEGRENADE = "csgrenade_killcount_hegrenade"
-const val KILLCOUNT_INCENDIARY = "csgrenade_killcount_incendiary"
-const val KILLCOUNT_MOLOTOV = "csgrenade_killcount_molotov"
+// commands
+const val OBJECTIVE_KILLCOUNT_HEGRENADE = "csgrenade_killcount_hegrenade"
+const val OBJECTIVE_KILLCOUNT_INCENDIARY = "csgrenade_killcount_incendiary"
+const val OBJECTIVE_KILLCOUNT_MOLOTOV = "csgrenade_killcount_molotov"
+const val COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_HEGRENADE =
+    "scoreboard objectives add $OBJECTIVE_KILLCOUNT_HEGRENADE dummy"
+const val COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_INCENDIARY =
+    "scoreboard objectives add $OBJECTIVE_KILLCOUNT_INCENDIARY dummy"
+const val COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_MOLOTOV = "scoreboard objectives add $OBJECTIVE_KILLCOUNT_MOLOTOV dummy"
+const val COMMAND_INCREASE_OBJECTIVE_KILLCOUNT_HEGRENADE = "scoreboard players add {} $OBJECTIVE_KILLCOUNT_HEGRENADE 1"
+const val COMMAND_INCREASE_OBJECTIVE_KILLCOUNT_INCENDIARY =
+    "scoreboard players add {} $OBJECTIVE_KILLCOUNT_INCENDIARY 1"
+const val COMMAND_INCREASE_OBJECTIVE_KILLCOUNT_MOLOTOV = "scoreboard players add {} $OBJECTIVE_KILLCOUNT_MOLOTOV 1"
