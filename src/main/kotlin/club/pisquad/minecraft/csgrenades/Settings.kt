@@ -31,6 +31,8 @@ const val GRENADE_ENTITY_SIZE = 0.3f
 // There are two types of throw actions, strong and weak, just like in CSGO
 const val STRONG_THROW_SPEED: Double = 1.3
 const val WEAK_THROW_SPEED: Double = 0.4
+const val MODERATE_THROW_SPEED = (STRONG_THROW_SPEED + WEAK_THROW_SPEED) / 2
+const val THROW_TYPE_TRANSIENT_TIME: Long = 1000
 const val STRONG_THROW_PLAYER_SPEED_FACTOR: Double = 1.3
 const val WEAK_THROW_PLAYER_SPEED_FACTOR: Double = 0.5
 

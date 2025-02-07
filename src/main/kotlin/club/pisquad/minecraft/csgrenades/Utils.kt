@@ -70,3 +70,15 @@ fun isPositionInSmoke(pos: Vec3, radius: Double): Boolean {
         it.entityData.get(CounterStrikeGrenadeEntity.isExplodedAccessor) && it.position().distanceTo(pos) < radius
     }
 }
+
+fun linearInterpolate(from: Vec3, to: Vec3, t: Double): Vec3 {
+    return Vec3(
+        from.x + (to.x - from.x) * t,
+        from.y + (to.y - from.y) * t,
+        from.z + (to.z - from.z) * t
+    )
+}
+
+fun linearInterpolate(from: Double, to: Double, t: Double): Double {
+    return from + (to - from) * t
+}

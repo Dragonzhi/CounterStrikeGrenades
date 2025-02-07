@@ -1,7 +1,5 @@
 package club.pisquad.minecraft.csgrenades.network.message
 
-import club.pisquad.minecraft.csgrenades.STRONG_THROW_SPEED
-import club.pisquad.minecraft.csgrenades.WEAK_THROW_SPEED
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.registery.ModEntities
 import club.pisquad.minecraft.csgrenades.serializer.RotationSerializer
@@ -19,12 +17,6 @@ import net.minecraft.world.phys.Vec3
 import net.minecraftforge.network.NetworkEvent
 import java.util.*
 import java.util.function.Supplier
-
-@Serializable
-enum class GrenadeThrowType(val speed: Double) {
-    Strong(STRONG_THROW_SPEED),
-    Weak(WEAK_THROW_SPEED)
-}
 
 @Serializable
 class GrenadeThrownMessage(

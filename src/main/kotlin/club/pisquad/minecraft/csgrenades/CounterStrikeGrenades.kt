@@ -1,7 +1,6 @@
 package club.pisquad.minecraft.csgrenades
 
 import club.pisquad.minecraft.csgrenades.command.ModCommands
-import club.pisquad.minecraft.csgrenades.compatibility.UpdateObjectives
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.registery.*
 import net.minecraftforge.common.MinecraftForge
@@ -52,6 +51,7 @@ object CounterStrikeGrenades {
 
         eventBus.addListener(ModCreativeTabs::onCreativeTabBuildContents)
         eventBus.addListener(ModParticleFactories::onRegisterParticleFactories)
+
     }
 
     /**
