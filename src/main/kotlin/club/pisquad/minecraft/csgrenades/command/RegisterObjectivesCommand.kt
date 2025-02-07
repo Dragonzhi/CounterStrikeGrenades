@@ -1,8 +1,6 @@
 package club.pisquad.minecraft.csgrenades.command
 
-import club.pisquad.minecraft.csgrenades.COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_HEGRENADE
-import club.pisquad.minecraft.csgrenades.COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_INCENDIARY
-import club.pisquad.minecraft.csgrenades.COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_MOLOTOV
+import club.pisquad.minecraft.csgrenades.compatibility.ObjectiveManager
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
@@ -25,10 +23,7 @@ object RegisterObjectivesCommand {
         val source = context.source
         val server = context.source.server
         val dispatcher = server.commands.dispatcher
-
-        dispatcher.execute(dispatcher.parse(COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_HEGRENADE, source))
-        dispatcher.execute(dispatcher.parse(COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_INCENDIARY, source))
-        dispatcher.execute(dispatcher.parse(COMMAND_REGISTER_OBJECTIVE_KILLCOUNT_MOLOTOV, source))
+        ObjectiveManager.initAllObjectives(server.scoreboard, dispatcher, source)
         return Command.SINGLE_SUCCESS
     }
 }

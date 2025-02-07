@@ -41,7 +41,7 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.FLASHBANG_HIT),
-            this.owner
+            this
         )
     }
 }
