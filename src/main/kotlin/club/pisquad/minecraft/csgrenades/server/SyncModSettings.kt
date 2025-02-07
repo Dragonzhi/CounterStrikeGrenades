@@ -17,7 +17,7 @@ object SyncModSettings {
     @SubscribeEvent
     fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) {
         CsGrenadePacketHandler.INSTANCE.send(
-            PacketDistributor.PLAYER.noArg(),
+            PacketDistributor.ALL.noArg(),
             SettingsChangeMessage(CsGrenadeConfigManager.config)
         )
     }
