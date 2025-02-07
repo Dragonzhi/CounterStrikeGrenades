@@ -90,7 +90,6 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     private fun clientRenderEffect() {
-        println("clientRenderEffect")
         val player = Minecraft.getInstance().player ?: return
         val distance = this.position().subtract(player.position()).length()
 
