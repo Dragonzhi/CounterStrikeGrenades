@@ -29,6 +29,7 @@ object ThrowActionHandler {
     private var throwSpeedTransientOrigin: Double? = null
     var currentThrowSpeed: Double? = null
     private var transientBeginTime: Instant = Instant.now()
+    private var previousSlot = -1;
 
     @SubscribeEvent
     fun onClientTick(event: ClientTickEvent) {
@@ -37,97 +38,93 @@ object ThrowActionHandler {
         if (Minecraft.getInstance().screen != null) return
 
         val player = Minecraft.getInstance().player ?: return
-        val hand: InteractionHand? = when {
-            player.getItemInHand(InteractionHand.MAIN_HAND).item is CounterStrikeGrenadeItem -> InteractionHand.MAIN_HAND
-            player.getItemInHand(InteractionHand.OFF_HAND).item is CounterStrikeGrenadeItem -> InteractionHand.OFF_HAND
-            else -> null
-        }
-        if (hand == null) return
+        val selectedSlot = player.inventory.selected
 
-        // TODO: We should let player press the throw key in advanced and trigger throw action after cooldown
-        if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() < GRENADE_THROW_COOLDOWN) return
         val (primaryButtonPressed, secondaryButtonPressed) = getButtonState()
 
-        if (!primaryButtonPressed && !secondaryButtonPressed) {
-            if (this.primaryButtonPressed || this.secondaryButtonPressed) {
-                val grenadeItem = player.getItemInHand(hand).item as CounterStrikeGrenadeItem
-                val grenadeType = grenadeItem.grenadeType
-                throwAction(this.currentThrowSpeed ?: 0.0, hand, grenadeType)
+        val itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND)
 
+        if (itemInHand.item is CounterStrikeGrenadeItem
+            && previousSlot == selectedSlot
+        ) {
+            if (Duration.between(this.grenadeLastThrow, Instant.now()).toMillis() > GRENADE_THROW_COOLDOWN) {
+                when (Pair(this.primaryButtonPressed, this.secondaryButtonPressed)) {
+                    Pair(false, false) -> {
+                        when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
+                            Pair(true, true) -> {
+                                this.setNewTransientTarget(MODERATE_THROW_SPEED, MODERATE_THROW_SPEED)
+                            }
+
+                            Pair(true, false) -> {
+                                this.setNewTransientTarget(STRONG_THROW_SPEED, STRONG_THROW_SPEED)
+                            }
+
+                            Pair(false, true) -> {
+                                this.setNewTransientTarget(WEAK_THROW_SPEED, WEAK_THROW_SPEED)
+                            }
+                        }
+                    }
+
+                    Pair(true, false) -> {
+                        when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
+                            Pair(true, true) -> {
+                                this.setNewTransientTarget(MODERATE_THROW_SPEED, null)
+                            }
+
+                            Pair(false, true) -> {
+                                this.setNewTransientTarget(WEAK_THROW_SPEED, null)
+                            }
+                        }
+                    }
+
+                    Pair(false, true) -> {
+                        when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
+                            Pair(true, true) -> {
+                                this.setNewTransientTarget(MODERATE_THROW_SPEED, null)
+                            }
+
+                            Pair(true, false) -> {
+                                this.setNewTransientTarget(STRONG_THROW_SPEED, null)
+                            }
+                        }
+                    }
+
+                    Pair(true, true) -> {
+                        when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
+                            Pair(true, false) -> {
+                                this.setNewTransientTarget(STRONG_THROW_SPEED, null)
+                            }
+
+                            Pair(false, true) -> {
+                                this.setNewTransientTarget(WEAK_THROW_SPEED, null)
+                            }
+                        }
+                    }
+                }
+                this.updateCurrentSpeed()
+                if (!primaryButtonPressed && !secondaryButtonPressed) {
+                    if (this.primaryButtonPressed || this.secondaryButtonPressed) {
+                        val grenadeType = (itemInHand.item as CounterStrikeGrenadeItem).grenadeType
+                        throwAction(this.currentThrowSpeed ?: 0.0, grenadeType)
+                        cleanProgress()
+                        this.grenadeLastThrow = Instant.now()
+                    }
+                }
+                this.primaryButtonPressed = primaryButtonPressed
+                this.secondaryButtonPressed = secondaryButtonPressed
             }
-            this.currentThrowSpeed = null
-            this.throwSpeedTransientTarget = null
-            this.throwSpeedTransientOrigin = null
-            this.handleButtonStateChange(primaryPressed = false, secondaryPressed = false)
-            return
+        } else {
+            this.primaryButtonPressed = false
+            this.secondaryButtonPressed = false
+            this.cleanProgress()
         }
-
-        when (Pair(this.primaryButtonPressed, this.secondaryButtonPressed)) {
-            Pair(false, false) -> {
-                when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
-                    Pair(true, true) -> {
-                        this.setNewTransientTarget(MODERATE_THROW_SPEED, MODERATE_THROW_SPEED)
-                    }
-
-                    Pair(true, false) -> {
-                        this.setNewTransientTarget(STRONG_THROW_SPEED, STRONG_THROW_SPEED)
-                    }
-
-                    Pair(false, true) -> {
-                        this.setNewTransientTarget(WEAK_THROW_SPEED, WEAK_THROW_SPEED)
-                    }
-                }
-            }
-
-            Pair(true, false) -> {
-                when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
-                    Pair(true, true) -> {
-                        this.setNewTransientTarget(MODERATE_THROW_SPEED, null)
-                    }
-
-                    Pair(false, true) -> {
-                        this.setNewTransientTarget(WEAK_THROW_SPEED, null)
-                    }
-                }
-            }
-
-            Pair(false, true) -> {
-                when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
-                    Pair(true, true) -> {
-                        this.setNewTransientTarget(MODERATE_THROW_SPEED, null)
-                    }
-
-                    Pair(true, false) -> {
-                        this.setNewTransientTarget(STRONG_THROW_SPEED, null)
-                    }
-                }
-            }
-
-            Pair(true, true) -> {
-                when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
-                    Pair(true, false) -> {
-                        this.setNewTransientTarget(STRONG_THROW_SPEED, null)
-                    }
-
-                    Pair(false, true) -> {
-                        this.setNewTransientTarget(WEAK_THROW_SPEED, null)
-                    }
-                }
-
-            }
-        }
-
-        this.handleButtonStateChange(primaryButtonPressed, secondaryButtonPressed)
-        this.updateCurrentSpeed()
+        this.previousSlot = selectedSlot
     }
 
-    private fun handleButtonStateChange(primaryPressed: Boolean, secondaryPressed: Boolean) {
-        if (primaryPressed != this.primaryButtonPressed) {
-            this.primaryButtonPressed = primaryPressed
-        }
-        if (secondaryPressed != this.secondaryButtonPressed) {
-            this.secondaryButtonPressed = secondaryPressed
-        }
+    private fun cleanProgress() {
+        this.currentThrowSpeed = null
+        this.throwSpeedTransientTarget = null
+        this.throwSpeedTransientOrigin = null
     }
 
     private fun setNewTransientTarget(speedTarget: Double, speedOrigin: Double?) {
@@ -137,6 +134,7 @@ object ThrowActionHandler {
     }
 
     private fun updateCurrentSpeed() {
+        if (throwSpeedTransientOrigin == null || throwSpeedTransientTarget == null) return
         this.currentThrowSpeed = linearInterpolate(
             this.throwSpeedTransientOrigin!!,
             this.throwSpeedTransientTarget!!,
@@ -159,7 +157,7 @@ object ThrowActionHandler {
     }
 }
 
-fun throwAction(throwSpeed: Double, hand: InteractionHand, grenadeType: GrenadeType) {
+fun throwAction(throwSpeed: Double, grenadeType: GrenadeType) {
     val player: Player = Minecraft.getInstance().player ?: return
     val speedFactor = (throwSpeed - WEAK_THROW_SPEED) / (STRONG_THROW_SPEED - WEAK_THROW_SPEED)
     val playerSpeedFactor =
@@ -174,7 +172,6 @@ fun throwAction(throwSpeed: Double, hand: InteractionHand, grenadeType: GrenadeT
     CsGrenadePacketHandler.INSTANCE.sendToServer(
         GrenadeThrownMessage(
             player.uuid,
-            hand,
             speed,
             grenadeType,
             Vec3(playerPos.x, playerPos.y + PLAYER_EYESIGHT_OFFSET, playerPos.z),

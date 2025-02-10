@@ -21,7 +21,6 @@ import java.util.function.Supplier
 @Serializable
 class GrenadeThrownMessage(
     @Serializable(with = UUIDSerializer::class) val ownerUUID: UUID,
-    val hand: InteractionHand,
     val speed: Double,
     val grenadeType: GrenadeType,
     @Serializable(with = Vec3Serializer::class) val position: Vec3,
@@ -74,7 +73,7 @@ class GrenadeThrownMessage(
 
             context.packetHandled = true
             if (!player.isCreative) {
-                player.inventory.removeItem(player.getItemInHand(msg.hand))
+                player.inventory.removeItem(player.getItemInHand(InteractionHand.MAIN_HAND))
             }
         }
 
