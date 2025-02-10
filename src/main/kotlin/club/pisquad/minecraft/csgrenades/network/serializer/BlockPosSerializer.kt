@@ -30,18 +30,3 @@ class BlockPosSerializer : KSerializer<BlockPos> {
         encoder.encodeSerializableValue(delegateSerializer, data)
     }
 }
-
-class BlockPosListSerializer : KSerializer<List<BlockPos>> {
-    private val delegateSerializer = ListSerializer(BlockPosSerializer())
-
-    @OptIn(ExperimentalSerializationApi::class)
-    override val descriptor: SerialDescriptor = SerialDescriptor("List<BlockPos>", delegateSerializer.descriptor)
-
-    override fun serialize(encoder: Encoder, value: List<BlockPos>) {
-        delegateSerializer.serialize(encoder, value)
-    }
-
-    override fun deserialize(decoder: Decoder): List<BlockPos> {
-        return delegateSerializer.deserialize(decoder)
-    }
-}

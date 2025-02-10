@@ -79,8 +79,8 @@ fun isPositionInSmoke(pos: Vec3, radius: Double): Boolean {
 }
 
 fun getBlockPosAround(pos: Vec3, radius: Int): List<BlockPos> {
-    val pos = BlockPos.containing(pos)
-    val begin = pos.offset(-radius, 0, -radius)
+    val posVec3 = BlockPos.containing(pos)
+    val begin = posVec3.offset(-radius, 0, -radius)
     val result = mutableListOf<BlockPos>()
     repeat(radius * 2) { xOffset ->
         repeat(radius * 2) { zOffset ->

@@ -29,7 +29,7 @@ object ThrowActionHandler {
     private var throwSpeedTransientOrigin: Double? = null
     var currentThrowSpeed: Double? = null
     private var transientBeginTime: Instant = Instant.now()
-    private var previousSlot = -1;
+    private var previousSlot = -1
 
     @SubscribeEvent
     fun onClientTick(event: ClientTickEvent) {

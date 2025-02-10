@@ -15,7 +15,6 @@ import java.util.function.Supplier
 
 @Serializable
 class FlashBangExplodedMessage(
-    val entityId: Int,
     @Serializable(with = Vec3Serializer::class) val position: Vec3
 ) {
     companion object {
