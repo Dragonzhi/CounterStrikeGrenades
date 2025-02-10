@@ -29,7 +29,7 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
             if (this.tickCount > 1.6 * 20) {
                 CsGrenadePacketHandler.INSTANCE.send(
                     PacketDistributor.ALL.noArg(),
-                    FlashBangExplodedMessage(this.id, this.position())
+                    FlashBangExplodedMessage(this.position())
                 )
                 this.entityData.set(isExplodedAccessor, true)
                 this.kill()
