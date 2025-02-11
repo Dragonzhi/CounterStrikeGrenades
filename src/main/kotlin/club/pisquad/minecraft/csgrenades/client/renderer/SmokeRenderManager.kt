@@ -1,4 +1,4 @@
-package club.pisquad.minecraft.csgrenades.helper
+package club.pisquad.minecraft.csgrenades.client.renderer
 
 import club.pisquad.minecraft.csgrenades.*
 import club.pisquad.minecraft.csgrenades.registery.ModParticles
@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod
 
 
 @Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
-object SmokeRenderHelper {
+object SmokeRenderManager {
     private var renderers: MutableList<SmokeRenderer> = mutableListOf()
 
     @SubscribeEvent

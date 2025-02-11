@@ -2,16 +2,20 @@ package club.pisquad.minecraft.csgrenades.entity
 
 import club.pisquad.minecraft.csgrenades.*
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
-import club.pisquad.minecraft.csgrenades.helper.SmokeRenderHelper
+import club.pisquad.minecraft.csgrenades.client.renderer.SmokeRenderManager
 import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
+import club.pisquad.minecraft.csgrenades.registery.ModSerializers
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.Vec3i
 import net.minecraft.core.registries.Registries
+import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
@@ -20,16 +24,28 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.Vec3
 
 class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
     CounterStrikeGrenadeEntity(pEntityType, pLevel, GrenadeType.FLASH_BANG) {
 
     private var lastPos: Vec3i = Vec3i(0, 0, 0)
-    private var tickCount: Int = 0
     private var localIsExploded = false
 
     override fun getDefaultItem(): Item {
         return ModItems.SMOKE_GRENADE_ITEM.get()
+    }
+
+    companion object {
+        val spreadBlocksAccessor: EntityDataAccessor<List<BlockPos>> = SynchedEntityData.defineId(
+            SmokeGrenadeEntity::class.java,
+            ModSerializers.blockPosListEntityDataSerializer
+        )
+    }
+
+    override fun defineSynchedData() {
+        super.defineSynchedData()
+        this.entityData.define(SmokeGrenadeEntity.spreadBlocksAccessor, listOf())
     }
 
     override fun tick() {
@@ -37,12 +53,10 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
 
         if (this.entityData.get(isLandedAccessor)) {
-            val currentPos = this.position().toVec3i()
-            if (currentPos == this.lastPos) {
+            if (this.position() == Vec3(this.xOld, this.yOld, this.zOld)) {
                 this.tickCount++
             } else {
                 tickCount = 0
-                this.lastPos = currentPos
             }
             if (getTimeFromTickCount(this.tickCount.toDouble()) > SMOKE_FUSE_TIME_AFTER_LAND && !localIsExploded) {
                 if (this.level() is ClientLevel) {
@@ -115,7 +129,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         soundManager.play(soundInstance)
 
         // Particles
-        SmokeRenderHelper.render(Minecraft.getInstance().particleEngine, this.position())
+        SmokeRenderManager.render(Minecraft.getInstance().particleEngine, this.position())
     }
 
     override fun getHitDamageSource(): DamageSource {

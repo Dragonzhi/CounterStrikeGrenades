@@ -4,8 +4,8 @@ import club.pisquad.minecraft.csgrenades.HEGRENADE_BASE_DAMAGE
 import club.pisquad.minecraft.csgrenades.HEGRENADE_DAMAGE_RANGE
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.getTimeFromTickCount
-import club.pisquad.minecraft.csgrenades.helper.HEGrenadeExplosionData
-import club.pisquad.minecraft.csgrenades.helper.HEGrenadeRenderHelper
+import club.pisquad.minecraft.csgrenades.client.renderer.HEGrenadeExplosionData
+import club.pisquad.minecraft.csgrenades.client.renderer.HEGrenadeRenderManager
 import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
@@ -35,7 +35,7 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
             if (this.level() is ServerLevel) {
                 this.doDamage()
             } else {
-                HEGrenadeRenderHelper.render(HEGrenadeExplosionData(this.position()))
+                HEGrenadeRenderManager.render(HEGrenadeExplosionData(this.position()))
             }
             this.entityData.set(isExplodedAccessor, true)
         }

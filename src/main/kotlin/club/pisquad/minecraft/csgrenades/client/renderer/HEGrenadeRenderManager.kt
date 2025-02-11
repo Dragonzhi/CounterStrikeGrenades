@@ -1,4 +1,4 @@
-package club.pisquad.minecraft.csgrenades.helper
+package club.pisquad.minecraft.csgrenades.client.renderer
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.SoundTypes
@@ -23,7 +23,7 @@ data class HEGrenadeExplosionData(
 
 
 @Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
-object HEGrenadeRenderHelper {
+object HEGrenadeRenderManager {
     private val renderers: MutableList<HEGrenadeRenderer> = mutableListOf()
 
     fun render(data: HEGrenadeExplosionData) {
