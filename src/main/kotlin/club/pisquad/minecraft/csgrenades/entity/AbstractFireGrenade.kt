@@ -17,6 +17,7 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.level.Level
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
 import net.minecraftforge.network.PacketDistributor
@@ -94,11 +95,17 @@ abstract class AbstractFireGrenade(
                 this.isNoGravity = true
 
                 // Test if any smoke nearby that extinguish this fire
-                val size = this.level()
-                    .getEntitiesOfClass(SmokeGrenadeEntity::class.java, getFireExtinguishRange(this.position())) {
-                        this.position().distanceTo(it.position()) < FIRE_EXTINGUISH_RANGE
-                    }.size
-                if (size > 0) {
+                val bb = AABB(this.blockPosition()).inflate(
+                    SMOKE_GRENADE_RADIUS.toDouble(), SMOKE_GRENADE_FALLDOWN_HEIGHT.toDouble(),
+                    SMOKE_GRENADE_RADIUS.toDouble()
+                )
+                if (this.level()
+                        .getEntitiesOfClass(SmokeGrenadeEntity::class.java, bb) {
+                            this.position().distanceTo(it.position()) < FIRE_EXTINGUISH_RANGE
+                        }.any {
+                            it.canDistinguishFire(this.position())
+                        }
+                ) {
                     this.extinguished = true
                 }
                 this.entityData.set(

@@ -131,7 +131,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         // If the smoke hit the ground with in any incendiary's range, it will emit right away
         super.onHitBlock(result)
         if (result.direction == Direction.UP) {
-            if (extinguishNearbyFires() > 0) {
+            if (this.extinguishNearbyFires() > 0) {
                 this.entityData.set(isLandedAccessor, true)
                 if (this.level() is ServerLevel && result.isInside) {
                     this.setPos(Vec3(this.position().x, result.blockPos.y + 1.0, this.position().z))
@@ -141,16 +141,28 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     private fun extinguishNearbyFires(): Int {
-        val bb = getFireExtinguishRange(this.position())
+        var extinguishedFires: List<AbstractFireGrenade> = listOf()
+        if (this.entityData.get(isExplodedAccessor)) {
+            val bb = AABB(this.blockPosition()).inflate(
+                SMOKE_GRENADE_RADIUS.toDouble(),
+                SMOKE_GRENADE_FALLDOWN_HEIGHT.toDouble(),
+                SMOKE_GRENADE_RADIUS.toDouble()
+            )
 
-        val extinguishedFires = this.level().getEntitiesOfClass(
-            AbstractFireGrenade::class.java,
-            bb
-        ) {
-            it.entityData.get(isExplodedAccessor) && it.getSpreadBlocks().any { blockPos: BlockPos ->
-                blockPos.distSqr(
-                    this.position().toVec3i()
-                ) < 1
+            extinguishedFires = this.level().getEntitiesOfClass(
+                AbstractFireGrenade::class.java,
+                bb
+            ) {
+                it.entityData.get(isExplodedAccessor) && canDistinguishFire(it.position())
+            }
+        } else {
+            val bb = AABB(this.blockPosition()).inflate(FIREGRENADE_RANGE.toDouble())
+            extinguishedFires = this.level().getEntitiesOfClass(
+                AbstractFireGrenade::class.java,
+                bb
+            ) {
+                it.entityData.get(isExplodedAccessor) && it.getSpreadBlocks()
+                    .any { pos -> pos.center.distanceToSqr(this.position()) < 1 }
             }
         }
 
@@ -195,7 +207,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     private fun calculateSpreadBlocks(): List<BlockPos> {
         val initialSmoke = getBlocksAround3D(
             this.position(),
-            SMOKE_GRENADE_RADIUS + 1, SMOKE_GRENADE_RADIUS - 1, SMOKE_GRENADE_RADIUS + 1
+            SMOKE_GRENADE_RADIUS, SMOKE_GRENADE_RADIUS - 2, SMOKE_GRENADE_RADIUS
         ).filter { it.center.distanceToSqr(this.position()) < (SMOKE_GRENADE_RADIUS * SMOKE_GRENADE_RADIUS) + 1 }
             .filter { pos ->
                 val context = ClipContext(
@@ -245,5 +257,8 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         }
         return this.spreadBlocksCache
     }
-}
 
+    fun canDistinguishFire(position: Vec3): Boolean {
+        return this.getSpreadBlocks().any { it.center.distanceToSqr(position) < 2.0 }
+    }
+}

@@ -63,25 +63,17 @@ fun getRandomLocationFromBlockSurface(position: BlockPos): Vec3 {
     return Vec3(position.x + x, position.y + 1.0, position.z + z)
 }
 
-fun getFireExtinguishRange(center: Vec3): AABB {
-    return AABB(
-        center.x - FIRE_EXTINGUISH_RANGE,
-        center.y - FIRE_EXTINGUISH_RANGE,
-        center.z - FIRE_EXTINGUISH_RANGE,
-        center.x + FIRE_EXTINGUISH_RANGE,
-        center.y + FIRE_EXTINGUISH_RANGE,
-        center.z + FIRE_EXTINGUISH_RANGE,
-    )
-}
 
 fun isPositionInSmoke(pos: Vec3): Boolean {
     val level = Minecraft.getInstance().level ?: return false
-    val blockPos = BlockPos.containing(pos)
     return level.getEntitiesOfClass(
         SmokeGrenadeEntity::class.java,
-        AABB(BlockPos(pos.toVec3i())).inflate(SMOKE_GRENADE_RADIUS.toDouble())
+        AABB(BlockPos(pos.toVec3i())).inflate(
+            SMOKE_GRENADE_RADIUS.toDouble(), SMOKE_GRENADE_FALLDOWN_HEIGHT.toDouble(),
+            SMOKE_GRENADE_RADIUS.toDouble()
+        )
     ).any {
-        it.getSpreadBlocks().any { block -> block == blockPos }
+        it.getSpreadBlocks().any { block -> block.toVec3().distanceToSqr(pos) < 1.0 }
     }
 }
 
