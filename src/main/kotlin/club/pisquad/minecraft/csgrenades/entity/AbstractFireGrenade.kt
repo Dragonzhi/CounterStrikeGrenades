@@ -165,7 +165,7 @@ abstract class AbstractFireGrenade(
         var currentPos = position
         var emptySpaceAbove = false
         repeat(FIRE_MAX_SPREAD_DOWNWARD) {
-            if (level.getBlockState(currentPos).canOcclude() && emptySpaceAbove) {
+            if (!level.getBlockState(currentPos).isAir && emptySpaceAbove) {
                 return currentPos
             }
             emptySpaceAbove = true
