@@ -168,7 +168,8 @@ abstract class AbstractFireGrenade(
         repeat(FIRE_MAX_SPREAD_DOWNWARD) {
             if (!level.getBlockState(currentPos).isAir) {
                 return if (emptySpaceAbove) {
-                    currentPos
+//                    we want the air block above the ground
+                    currentPos.above()
                 } else {
                     null
                 }

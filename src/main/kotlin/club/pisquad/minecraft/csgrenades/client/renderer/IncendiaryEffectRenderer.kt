@@ -29,9 +29,9 @@ object FireGrenadeRenderer {
             val position = grenade.position()
 
 
-            val pos = getRandomLocationFromBlockSurface(spreadBlocks.random())
+            val pos = getRandomLocationFromBlockSurface(spreadBlocks.random().below())
             if (isPositionInSmoke(
-                    position
+                    position.add(0.0, 1.0, 0.0)
                 )
             ) {
                 continue

@@ -66,14 +66,15 @@ fun getRandomLocationFromBlockSurface(position: BlockPos): Vec3 {
 
 fun isPositionInSmoke(pos: Vec3): Boolean {
     val level = Minecraft.getInstance().level ?: return false
+    val blockPos = BlockPos.containing(pos)
     return level.getEntitiesOfClass(
         SmokeGrenadeEntity::class.java,
         AABB(BlockPos(pos.toVec3i())).inflate(
-            SMOKE_GRENADE_RADIUS.toDouble(), SMOKE_GRENADE_FALLDOWN_HEIGHT.toDouble(),
-            SMOKE_GRENADE_RADIUS.toDouble()
+            SMOKE_GRENADE_RADIUS * 2.0, SMOKE_GRENADE_FALLDOWN_HEIGHT.toDouble() + SMOKE_GRENADE_RADIUS * 2.0,
+            SMOKE_GRENADE_RADIUS * 2.0
         )
     ).any {
-        it.getSpreadBlocks().any { block -> block.toVec3().distanceToSqr(pos) < 1.0 }
+        it.getSpreadBlocks().any { block -> block == blockPos }
     }
 }
 
@@ -81,8 +82,8 @@ fun getBlockPosAround2D(pos: Vec3, radius: Int): List<BlockPos> {
     val posVec3 = BlockPos.containing(pos)
     val begin = posVec3.offset(-radius, 0, -radius)
     val result = mutableListOf<BlockPos>()
-    repeat((radius * 2)+1) { xOffset ->
-        repeat((radius * 2)+1) { zOffset ->
+    repeat((radius * 2) + 1) { xOffset ->
+        repeat((radius * 2) + 1) { zOffset ->
             result.add(BlockPos(begin.offset(xOffset, 0, zOffset)))
         }
     }
