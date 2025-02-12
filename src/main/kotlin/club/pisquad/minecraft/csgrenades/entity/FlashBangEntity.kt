@@ -2,10 +2,13 @@ package club.pisquad.minecraft.csgrenades.entity
 
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
+import club.pisquad.minecraft.csgrenades.network.message.AffectedPlayerInfo
 import club.pisquad.minecraft.csgrenades.network.message.FlashBangExplodedMessage
+import club.pisquad.minecraft.csgrenades.network.message.FlashbangEffectData
 import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import net.minecraft.core.registries.Registries
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
@@ -29,7 +32,7 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
             if (this.tickCount > 1.6 * 20) {
                 CsGrenadePacketHandler.INSTANCE.send(
                     PacketDistributor.ALL.noArg(),
-                    FlashBangExplodedMessage(this.position())
+                    FlashBangExplodedMessage(this.position(), calculateAffectedPlayers())
                 )
                 this.entityData.set(isExplodedAccessor, true)
                 this.kill()
@@ -43,5 +46,13 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.FLASHBANG_HIT),
             this
         )
+    }
+
+    private fun calculateAffectedPlayers(): List<AffectedPlayerInfo> {
+        val level = this.level() as ServerLevel
+        return level.getPlayers { it.distanceToSqr(this.position()) < 640 }.map {
+            AffectedPlayerInfo(it.uuid, FlashbangEffectData.create(this.position(), it))
+        }.filter { it.effectData.effectSustain > 0 }
+
     }
 }

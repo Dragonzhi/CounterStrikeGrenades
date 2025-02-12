@@ -3,6 +3,7 @@ package club.pisquad.minecraft.csgrenades.client.renderer
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
+import club.pisquad.minecraft.csgrenades.network.message.FlashbangEffectData
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
 import club.pisquad.minecraft.csgrenades.sound.FlashbangRingSound
 import net.minecraft.client.Minecraft
@@ -11,9 +12,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.sounds.SoundSource
 import net.minecraft.util.FastColor
 import net.minecraft.util.RandomSource
-import net.minecraft.world.level.ClipContext
-import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.Vec3
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraftforge.client.event.RenderGuiOverlayEvent
@@ -22,69 +20,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 import java.time.Duration
 import java.time.Instant
-import kotlin.math.PI
-import kotlin.math.acos
 import kotlin.math.max
 import kotlin.math.sqrt
 
-
-@OnlyIn(Dist.CLIENT)
-data class FlashbangEffectData(
-    val position: Vec3, val effectAttack: Int, val effectSustain: Int, val effectDecay: Int, val effectAmount: Int
-) {
-    companion object {
-        fun create(flashbangPos: Vec3): FlashbangEffectData {
-            val player = Minecraft.getInstance().player!!
-            val playerToFlashVec = flashbangPos.add(player.position().reverse())
-            val distance = playerToFlashVec.length()
-            val angle = acos(player.lookAngle.dot(playerToFlashVec.normalize())).times(180).times(1 / PI)
-
-            val distanceFactor = getDistanceFactor(distance)
-            val blockingFactor = getBlockingFactor(flashbangPos, player.eyePosition)
-
-            val fullyBlindedTime = max(
-                0.0, when (angle) {
-                    in 0.0..53.0 -> 1.88
-                    in 53.0..72.0 -> 0.45
-                    in 72.0..101.0 -> 0.08
-                    in 101.0..180.0 -> 0.08
-                    else -> 0.0
-                } * distanceFactor * blockingFactor
-            )
-
-            val totalEffectTime = max(
-                0.0, when (angle) {
-                    in 0.0..53.0 -> 4.0
-                    in 53.0..72.0 -> 3.0
-                    in 72.0..101.0 -> 1.5
-                    in 101.0..180.0 -> 0.5
-                    else -> 0.0
-                } * distanceFactor * blockingFactor
-            )
-
-            return FlashbangEffectData(
-                position = flashbangPos,
-                effectAttack = 20,
-                effectAmount = 50,
-                effectSustain = (fullyBlindedTime * 1000).toInt(),
-                effectDecay = ((totalEffectTime - fullyBlindedTime) * 1000).toInt()
-            )
-        }
-
-        private fun getDistanceFactor(distance: Double): Double {
-            return max(-0.015 * distance + 1, 0.0)
-        }
-
-        private fun getBlockingFactor(flashbangPos: Vec3, playerEyePos: Vec3): Double {
-            val level = Minecraft.getInstance().level ?: return 1.0
-            val context =
-                ClipContext(playerEyePos, flashbangPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null)
-            val result = level.clip(context)
-            return if (result.type.equals(HitResult.Type.MISS)) 1.0 else 0.0
-        }
-    }
-
-}
 
 private enum class RenderState {
     IDLE,
@@ -95,7 +33,7 @@ private enum class RenderState {
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
-object FlashbangEffectRenderer {
+object FlashbangBlindEffectRenderer {
     private var effectAttack: Int = 0
     private var effectSustain: Int = 0
     private var effectDecay: Int = 0
@@ -113,7 +51,7 @@ object FlashbangEffectRenderer {
                 effectDecay = effectData.effectDecay
                 effectAmount = effectData.effectAmount
 
-                MinecraftForge.EVENT_BUS.register(FlashbangEffectRenderer::eventHandler)
+                MinecraftForge.EVENT_BUS.register(FlashbangBlindEffectRenderer::eventHandler)
             }
 
             RenderState.AttackStage, RenderState.SustainStage -> {
@@ -179,7 +117,7 @@ object FlashbangEffectRenderer {
         effectSustain = 0
         effectAmount = 0
         renderState = RenderState.IDLE
-        MinecraftForge.EVENT_BUS.unregister(FlashbangEffectRenderer::eventHandler)
+        MinecraftForge.EVENT_BUS.unregister(FlashbangBlindEffectRenderer::eventHandler)
     }
 
     private fun playRingSound(effectData: FlashbangEffectData) {
