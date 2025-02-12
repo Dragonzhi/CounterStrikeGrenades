@@ -141,17 +141,18 @@ abstract class AbstractFireGrenade(
         val damageSource = this.getDamageSource()
         val spreadBlocks = this.entityData.get(spreadBlocksAccessor) ?: return
         for (player in level.players()) {
-            for (block in spreadBlocks) {
-                val offset = block.offset(0, 1, 0)
-                if (Vec3.atCenterOf(offset)
-                        .distanceToSqr(player.position()) < 0.5 && !isPositionInSmoke(
+            spreadBlocks.any {
+                if (it == player.blockPosition().offset(0, -1, 0) && !isPositionInSmoke(
                         player.position(),
                     )
                 ) {
                     val playerMovement = player.deltaMovement
                     player.hurt(damageSource, 3f)
                     player.deltaMovement = playerMovement
+                    return@any true
                 }
+                return@any false
+
             }
         }
     }
