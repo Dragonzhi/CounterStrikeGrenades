@@ -81,8 +81,8 @@ fun getBlockPosAround2D(pos: Vec3, radius: Int): List<BlockPos> {
     val posVec3 = BlockPos.containing(pos)
     val begin = posVec3.offset(-radius, 0, -radius)
     val result = mutableListOf<BlockPos>()
-    repeat(radius * 2) { xOffset ->
-        repeat(radius * 2) { zOffset ->
+    repeat((radius * 2)+1) { xOffset ->
+        repeat((radius * 2)+1) { zOffset ->
             result.add(BlockPos(begin.offset(xOffset, 0, zOffset)))
         }
     }
@@ -94,9 +94,9 @@ fun getBlocksAround3D(pos: Vec3, xRange: Int, yRange: Int, zRange: Int): List<Bl
     val posVec3 = BlockPos.containing(pos)
     val begin = posVec3.offset(-xRange, -yRange, -zRange)
     val result = mutableListOf<BlockPos>()
-    repeat(xRange * 2) { xOffset ->
-        repeat(yRange * 2) { yOffset ->
-            repeat(zRange * 2) { zOffset ->
+    repeat((xRange * 2) + 1) { xOffset ->
+        repeat((yRange * 2) + 1) { yOffset ->
+            repeat((zRange * 2) + 1) { zOffset ->
                 result.add(
                     BlockPos(
                         begin.offset(
@@ -114,4 +114,13 @@ fun getBlocksAround3D(pos: Vec3, xRange: Int, yRange: Int, zRange: Int): List<Bl
 
 fun linearInterpolate(from: Double, to: Double, t: Double): Double {
     return from + (to - from) * t
+}
+
+fun randomDirection(origin: BlockPos): BlockPos {
+    return when ((Random.nextInt(4))) {
+        0 -> origin.north()
+        1 -> origin.south()
+        2 -> origin.west()
+        else -> origin.east()
+    }
 }
