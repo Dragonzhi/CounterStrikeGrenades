@@ -43,7 +43,7 @@ object FlashbangParticleEffectRenderer {
 
     private fun createParticleAtPlayer(player: Player) {
         val particleEngine = Minecraft.getInstance().particleEngine
-        val position = player.eyePosition.add(player.lookAngle.scale(0.3))
+        val position = player.eyePosition.add(player.lookAngle.scale(0.6))
         val speed = player.deltaMovement
 
         val particle = particleEngine.createParticle(
