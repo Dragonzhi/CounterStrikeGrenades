@@ -63,4 +63,10 @@ jobs:
           project: "DfhBvciR"
           version: ${{ github.ref_name }}
           changelog: ${{ steps.changelog.outputs.changes }}
+          loaders: |-
+            forge
+          game-versions: |-
+            1.20.1
+          files: |-
+            csgrenade-${{ github.ref_name }}.jar
     
