@@ -1,10 +1,10 @@
 package club.pisquad.minecraft.csgrenades
 
 import club.pisquad.minecraft.csgrenades.entity.SmokeGrenadeEntity
-import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Vec3i
 import net.minecraft.util.RandomSource
+import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
@@ -64,8 +64,7 @@ fun getRandomLocationFromBlockSurface(position: BlockPos): Vec3 {
 }
 
 
-fun isPositionInSmoke(pos: Vec3): Boolean {
-    val level = Minecraft.getInstance().level ?: return false
+fun isPositionInSmoke(level: Level, pos: Vec3): Boolean {
     val blockPos = BlockPos.containing(pos)
     return level.getEntitiesOfClass(
         SmokeGrenadeEntity::class.java,

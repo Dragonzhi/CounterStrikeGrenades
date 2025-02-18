@@ -142,6 +142,7 @@ abstract class AbstractFireGrenade(
         for (player in level.players()) {
             spreadBlocks.any {
                 if (it == player.blockPosition() && !isPositionInSmoke(
+                        this.level(),
                         player.position(),
                     )
                 ) {
