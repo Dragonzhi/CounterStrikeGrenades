@@ -12,10 +12,6 @@ import net.minecraftforge.fml.common.Mod
 object ModRenderers {
     @SubscribeEvent
     fun registerEntityRenderers(event: EntityRenderersEvent.RegisterRenderers) {
-        Logger.info("Registering entity renderers")
-
-        Logger.info("Registering render for flashbang")
-
         EntityRenderers.register(ModEntities.FLASH_BANG_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.SMOKE_GRENADE_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.HEGRENADE_ENTITY.get(), ::ThrownItemRenderer)

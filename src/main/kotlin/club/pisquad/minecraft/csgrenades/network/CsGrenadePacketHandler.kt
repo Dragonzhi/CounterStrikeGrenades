@@ -14,7 +14,6 @@ import java.util.*
 private const val PROTOCOL_VERSION = "1"
 
 object CsGrenadePacketHandler {
-    //    val Logger = LogManager.getLogger(CounterStrikeGrenades.ID + ":packet_handler")
     private var messageTypeCount: Int = 1
         get() {
             field += 1

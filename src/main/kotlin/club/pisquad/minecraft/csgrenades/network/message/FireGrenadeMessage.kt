@@ -17,8 +17,6 @@ import net.minecraft.world.phys.Vec3
 import net.minecraftforge.network.NetworkEvent
 import java.util.function.Supplier
 
-//private val Logger: Logger = LogManager.getLogger(CounterStrikeGrenades.ID + ":message:flashbangExplodedMessage")
-
 @Serializable
 class FireGrenadeMessage(
     val messageType: MessageType,
@@ -33,13 +31,11 @@ class FireGrenadeMessage(
 
     companion object {
         fun encoder(msg: FireGrenadeMessage, buffer: FriendlyByteBuf) {
-//            Logger.info("Encoding message $msg")
             buffer.writeUtf(Json.encodeToString(msg))
         }
 
         fun decoder(buffer: FriendlyByteBuf): FireGrenadeMessage {
             val text = buffer.readUtf()
-//            Logger.info("Decoding string $text")
             return Json.decodeFromString<FireGrenadeMessage>(text)
         }
 

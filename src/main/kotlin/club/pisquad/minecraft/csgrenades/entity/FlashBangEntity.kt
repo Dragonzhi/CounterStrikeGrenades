@@ -18,7 +18,6 @@ import net.minecraftforge.network.PacketDistributor
 
 class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
     CounterStrikeGrenadeEntity(pEntityType, pLevel, GrenadeType.FLASH_BANG) {
-//    private val logger: Logger = LogManager.getLogger(CounterStrikeGrenades.ID + ":flashbang_entity")
 
     override fun getDefaultItem(): Item {
         return ModItems.FLASH_BANG_ITEM.get()

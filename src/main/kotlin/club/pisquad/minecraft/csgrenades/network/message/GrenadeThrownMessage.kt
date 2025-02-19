@@ -27,22 +27,17 @@ class GrenadeThrownMessage(
     @Serializable(with = RotationSerializer::class) val rotation: Rotations,
 ) {
     companion object {
-//        private val Logger: Logger = LogManager.getLogger(CounterStrikeGrenades.ID + ":message:grenadeThrownMessage")
 
         fun encoder(msg: GrenadeThrownMessage, buffer: FriendlyByteBuf) {
-//            Logger.info("Encoding message $msg")
             buffer.writeUtf(Json.encodeToString(msg))
         }
 
         fun decoder(buffer: FriendlyByteBuf): GrenadeThrownMessage {
             val text = buffer.readUtf()
-//            Logger.info("Decoding string $text")
             return Json.decodeFromString<GrenadeThrownMessage>(text)
         }
 
         fun handler(msg: GrenadeThrownMessage, ctx: Supplier<NetworkEvent.Context>) {
-//            Logger.info("Handling message $msg")
-
             val context = ctx.get()
             val player: ServerPlayer = context.sender ?: return
 
