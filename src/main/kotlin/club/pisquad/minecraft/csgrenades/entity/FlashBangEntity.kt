@@ -51,7 +51,7 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
     private fun calculateAffectedPlayers(): List<AffectedPlayerInfo> {
         val level = this.level() as ServerLevel
         return level.getPlayers { it.distanceToSqr(this.position()) < 640 }.map {
-            AffectedPlayerInfo(it.uuid, FlashbangEffectData.create(this.position(), it))
+            AffectedPlayerInfo(it.uuid, FlashbangEffectData.create(this.level(), this.position(), it))
         }.filter { it.effectData.effectSustain > 0 }
 
     }

@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.util.RandomSource
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.ClipContext
+import net.minecraft.world.level.Level
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import net.minecraftforge.network.NetworkEvent
@@ -36,13 +37,13 @@ data class FlashbangEffectData(
     val effectAmount: Int
 ) {
     companion object {
-        fun create(flashbangPos: Vec3, player: Player): FlashbangEffectData {
+        fun create(level: Level, flashbangPos: Vec3, player: Player): FlashbangEffectData {
             val playerToFlashVec = flashbangPos.add(player.position().reverse())
             val distance = playerToFlashVec.length()
             val angle = acos(player.lookAngle.dot(playerToFlashVec.normalize())).times(180).times(1 / PI)
 
             val distanceFactor = getDistanceFactor(distance)
-            val blockingFactor = getBlockingFactor(flashbangPos, player.eyePosition)
+            val blockingFactor = getBlockingFactor(level, flashbangPos, player.eyePosition)
 
             val fullyBlindedTime = max(
                 0.0, when (angle) {
@@ -77,8 +78,7 @@ data class FlashbangEffectData(
             return max(-0.015 * distance + 1, 0.0)
         }
 
-        private fun getBlockingFactor(flashbangPos: Vec3, playerEyePos: Vec3): Double {
-            val level = Minecraft.getInstance().level ?: return 1.0
+        private fun getBlockingFactor(level: Level, flashbangPos: Vec3, playerEyePos: Vec3): Double {
             val context =
                 ClipContext(playerEyePos, flashbangPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null)
             val result = level.clip(context)
