@@ -10,7 +10,6 @@ import club.pisquad.minecraft.csgrenades.registery.ModSerializers
 import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
 import kotlinx.serialization.Serializable
 import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -53,7 +52,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
     override fun defineSynchedData() {
         super.defineSynchedData()
-        this.entityData.define(SmokeGrenadeEntity.spreadBlocksAccessor, listOf())
+        this.entityData.define(spreadBlocksAccessor, listOf())
     }
 
     fun registerParticle(particle: SmokeGrenadeParticle) {

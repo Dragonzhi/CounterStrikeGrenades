@@ -1,7 +1,6 @@
 package club.pisquad.minecraft.csgrenades.registery
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
-import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades.Logger
 import net.minecraft.client.renderer.entity.EntityRenderers
 import net.minecraft.client.renderer.entity.ThrownItemRenderer
 import net.minecraftforge.client.event.EntityRenderersEvent
