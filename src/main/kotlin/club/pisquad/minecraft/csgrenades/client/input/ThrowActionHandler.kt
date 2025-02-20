@@ -108,6 +108,7 @@ object ThrowActionHandler {
                     if (this.primaryButtonPressed || this.secondaryButtonPressed) {
                         val grenadeType = (itemInHand.item as CounterStrikeGrenadeItem).grenadeType
                         throwAction(this.currentThrowSpeed ?: 0.0, grenadeType)
+                        setItemCoolDown(player)
                         cleanProgress()
                         this.grenadeLastThrow = Instant.now()
                     }
@@ -180,4 +181,13 @@ fun throwAction(throwSpeed: Double, grenadeType: GrenadeType) {
             Rotations(player.xRot, player.yRot, 0.0f),
         )
     )
+}
+
+fun setItemCoolDown(player: Player) {
+    player.inventory.items.forEach {
+        if (it.item is CounterStrikeGrenadeItem) {
+            player.cooldowns.addCooldown(it.item, GRENADE_THROW_COOLDOWN / 1000 * 20)
+        }
+    }
+
 }
