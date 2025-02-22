@@ -32,17 +32,39 @@ object ThrowActionHandler {
     var currentThrowSpeed: Double? = null
     private var transientBeginTime: Instant = Instant.now()
     private var previousSlot = -1
+    private var screenOpened = false
+    private var buttonPressedWhenScreenOpen = false
 
     @SubscribeEvent
     fun onClientTick(event: ClientTickEvent) {
         if (event.phase == TickEvent.Phase.START) return
+
+        val (primaryButtonPressed, secondaryButtonPressed) = getButtonState()
+
         // Test if any screen is opened (e.g. inventory, chat, menu, etc.)
-        if (Minecraft.getInstance().screen != null) return
+        if (Minecraft.getInstance().screen != null) {
+            this.screenOpened = true
+            if (this.primaryButtonPressed || this.secondaryButtonPressed) {
+                this.cleanProgress()
+                this.buttonPressedWhenScreenOpen = true
+            }
+            return
+        } else if (screenOpened) {
+            this.buttonPressedWhenScreenOpen = primaryButtonPressed || secondaryButtonPressed
+            this.screenOpened = false
+            return
+        }
+        if (buttonPressedWhenScreenOpen) {
+            if (!(primaryButtonPressed || secondaryButtonPressed)) {
+                this.buttonPressedWhenScreenOpen = false
+                return
+            }
+            return
+        }
 
         val player = Minecraft.getInstance().player ?: return
         val selectedSlot = player.inventory.selected
 
-        val (primaryButtonPressed, secondaryButtonPressed) = getButtonState()
 
         val itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND)
 
@@ -125,6 +147,8 @@ object ThrowActionHandler {
     }
 
     private fun cleanProgress() {
+        this.primaryButtonPressed = false
+        this.secondaryButtonPressed = false
         this.currentThrowSpeed = null
         this.throwSpeedTransientTarget = null
         this.throwSpeedTransientOrigin = null
