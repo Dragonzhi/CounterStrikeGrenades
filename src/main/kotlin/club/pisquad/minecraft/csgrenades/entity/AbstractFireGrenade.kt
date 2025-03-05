@@ -17,6 +17,8 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.AABB
@@ -147,20 +149,27 @@ abstract class AbstractFireGrenade(
         val level = this.level() as ServerLevel
         val damageSource = this.getDamageSource()
         val spreadBlocks = this.entityData.get(spreadBlocksAccessor) ?: return
-        for (player in level.players()) {
+
+        val entities =
+            level.getEntitiesOfClass(
+                if (ModConfig.DAMAGE_NON_PLAYER_ENTITY.get()) LivingEntity::class.java else Player::class.java,
+                AABB(this.blockPosition()).inflate(ModConfig.HEGrenade.DAMAGE_RANGE.get())
+            )
+
+        for (entity in entities) {
             spreadBlocks.any {
-                if (it == player.blockPosition() && !isPositionInSmoke(
+                if (it == entity.blockPosition() && !isPositionInSmoke(
                         this.level(),
-                        player.position(),
+                        entity.position(),
                     )
                 ) {
-                    val playerMovement = player.deltaMovement
-                    player.hurt(damageSource, 3f)
-                    player.deltaMovement = playerMovement
+                    val playerMovement = entity.deltaMovement
+                    entity.hurt(damageSource, 3f)
+                    entity.deltaMovement = playerMovement
                     return@any true
                 }
-                return@any false
 
+                return@any false
             }
         }
     }

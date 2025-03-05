@@ -14,6 +14,7 @@ object ModConfig {
     var PLAYER_SPEED_FACTOR_WEAK: ForgeConfigSpec.DoubleValue
     var THROW_TYPE_TRANSIENT_TIME: ForgeConfigSpec.IntValue
     var FOV_EFFECT_AMOUNT: ForgeConfigSpec.DoubleValue
+    var DAMAGE_NON_PLAYER_ENTITY: ForgeConfigSpec.BooleanValue
 
     object SmokeGrenade {
         lateinit var SMOKE_RADIUS: ForgeConfigSpec.IntValue
@@ -59,6 +60,8 @@ object ModConfig {
         builder.comment("Transient time for throw type, in milliseconds")
         THROW_TYPE_TRANSIENT_TIME = builder.defineInRange("throw_type_transient_time", 1000, 0, 60 * 1000)
         FOV_EFFECT_AMOUNT = builder.defineInRange("fov_effect_amount", 0.12, 0.0, 1.0)
+        builder.comment("Damage living entities other than player")
+        DAMAGE_NON_PLAYER_ENTITY = builder.define("damage_non_player_entity", true)
 
         builder.push("SmokeGrenade")
         builder.comment("Smoke radius, in block")
