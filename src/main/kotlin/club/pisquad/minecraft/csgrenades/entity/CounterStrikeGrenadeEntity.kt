@@ -14,6 +14,8 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.BarrierBlock
@@ -50,7 +52,17 @@ abstract class CounterStrikeGrenadeEntity(
 
 
     override fun onHitEntity(result: EntityHitResult) {
-        result.entity.hurt(this.getHitDamageSource(), 1f)
+        if (result.entity is LivingEntity) {
+            val entity = result.entity as LivingEntity
+
+            val originalKnockBackResistance =
+                entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue ?: 0.0
+
+            entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
+            entity.hurt(this.getHitDamageSource(), 1f)
+
+            entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
+        }
     }
 
     override fun tick() {
