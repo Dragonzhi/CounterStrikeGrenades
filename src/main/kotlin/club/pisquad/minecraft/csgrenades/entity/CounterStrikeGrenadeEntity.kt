@@ -50,7 +50,7 @@ abstract class CounterStrikeGrenadeEntity(
 
 
     override fun onHitEntity(result: EntityHitResult) {
-        result.entity.hurt(this.getHitDamageSource(), 2f)
+        result.entity.hurt(this.getHitDamageSource(), 1f)
     }
 
     override fun tick() {
