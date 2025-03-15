@@ -144,6 +144,10 @@ abstract class CounterStrikeGrenadeEntity(
         }
     }
 
+    override fun isOnFire(): Boolean {
+        return false
+    }
+
     override fun shouldBeSaved(): Boolean {
         return false
     }
