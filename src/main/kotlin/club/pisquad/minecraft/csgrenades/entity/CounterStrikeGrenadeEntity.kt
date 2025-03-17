@@ -135,21 +135,12 @@ abstract class CounterStrikeGrenadeEntity(
             return
 
         } else {
-            this.deltaMovement = when (result.direction) {
-                Direction.UP, Direction.DOWN -> Vec3(deltaMovement.x, -deltaMovement.y, deltaMovement.z)
-
-                Direction.WEST, Direction.EAST ->
-                    Vec3(-deltaMovement.x, deltaMovement.y, deltaMovement.z)
-
-                Direction.NORTH, Direction.SOUTH ->
-                    Vec3(deltaMovement.x, deltaMovement.y, -deltaMovement.z)
-
-                null -> deltaMovement
-
-            }
-//                if (result.isInside) {
+            this.bounce(
+                result.direction,
+                speedCoefficient = 0.7f,
+                frictionFactor = 0.9f
+            )
             this.setPos(this.xOld, this.yOld, this.zOld)
-//                }
 
             this.deltaMovement = this.deltaMovement.scale(0.5)
         }
@@ -158,6 +149,31 @@ abstract class CounterStrikeGrenadeEntity(
             this.setPos(this.x, result.blockPos.y.toDouble() + 1, this.z)
             this.deltaMovement = Vec3.ZERO
             this.entityData.set(isLandedAccessor, true)
+        }
+    }
+
+    private fun bounce(direction: Direction, speedCoefficient: Float, frictionFactor: Float) {
+        this.deltaMovement = when (direction) {
+            Direction.UP, Direction.DOWN ->
+                Vec3(
+                    deltaMovement.x * frictionFactor,
+                    -deltaMovement.y * speedCoefficient,
+                    deltaMovement.z * frictionFactor
+                )
+
+            Direction.WEST, Direction.EAST ->
+                Vec3(
+                    -deltaMovement.x * speedCoefficient,
+                    deltaMovement.y * frictionFactor,
+                    deltaMovement.z * frictionFactor
+                )
+
+            Direction.NORTH, Direction.SOUTH ->
+                Vec3(
+                    deltaMovement.x * frictionFactor,
+                    deltaMovement.y * frictionFactor,
+                    -deltaMovement.z * speedCoefficient
+                )
         }
     }
 
