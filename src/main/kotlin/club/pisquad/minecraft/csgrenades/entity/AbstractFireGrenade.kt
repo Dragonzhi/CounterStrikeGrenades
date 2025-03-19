@@ -88,15 +88,27 @@ abstract class AbstractFireGrenade(
                 this.kill()
             }
         }
+        if (!this.isInWater) {
+            if (this.deltaMovement.snapToAxis() == Direction.DOWN) {
+                val nextPosition = this.position().add(this.deltaMovement)
+                val nextBlockPos = BlockPos.containing(nextPosition)
+                val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
+                if (isNextBlockPosInWater) {
+                    this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
+                }
+            }
+        }
     }
 
     override fun onHitBlock(result: BlockHitResult) {
         // fire type grenade Explodes when hit a walkable surface that is 30 degree or smaller from horizon.
         // But in MC, all grounds are flat and horizontal
         // we only want the server to handle this logic
+
+        if (this.entityData.get(isExplodedAccessor) || this.entityData.get(isLandedAccessor)) return
         if (this.extinguished) return
+
         if (!this.level().isClientSide) {
-            if (this.entityData.get(isExplodedAccessor) || this.entityData.get(isLandedAccessor)) return
             if (result.direction == Direction.UP) {
                 this.entityData.set(isExplodedAccessor, true)
                 this.entityData.set(isLandedAccessor, true)
@@ -160,10 +172,9 @@ abstract class AbstractFireGrenade(
                 AABB(this.blockPosition()).inflate(ModConfig.HEGrenade.DAMAGE_RANGE.get())
             )
         val entitiesInRange = entities.filter { entity ->
-            spreadBlocks.any {
-                it == entity.blockPosition().below() && !isPositionInSmoke(
-                    this.level(),
-                    entity.position(),
+            spreadBlocks.any { blockPos ->
+                blockPos.center.horizontalDistanceTo(entity.position()) < 1.0 && entity.y < blockPos.y + 1.0 && entity.y > blockPos.y - 2.0 && !isPositionInSmoke(
+                    this.level(), entity.position(),
                 )
             }
         }
