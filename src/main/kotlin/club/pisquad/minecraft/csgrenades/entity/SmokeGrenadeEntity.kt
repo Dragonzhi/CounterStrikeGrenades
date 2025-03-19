@@ -289,7 +289,8 @@ private class SmokeGrenadeSpreadBlockCalculator(
             Direction.WEST -> blockPos.west()
             Direction.EAST -> blockPos.east()
         }
-        if (!level.getBlockState(newLocation).canOcclude()) {
+        val blockState = level.getBlockState(newLocation)
+        if (!blockState.canOcclude() && !blockState.isCollisionShapeFullBlock(level, newLocation)) {
             return newLocation
         }
 
