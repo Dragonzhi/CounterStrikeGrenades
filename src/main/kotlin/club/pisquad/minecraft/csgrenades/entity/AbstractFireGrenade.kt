@@ -173,7 +173,7 @@ abstract class AbstractFireGrenade(
             )
         val entitiesInRange = entities.filter { entity ->
             spreadBlocks.any { blockPos ->
-                blockPos.center.horizontalDistanceTo(entity.position()) < 1.0 && entity.y < blockPos.y + 1.0 && entity.y > blockPos.y - 2.0 && !isPositionInSmoke(
+                blockPos.center.horizontalDistanceTo(entity.position()) < 1.0 && entity.y < blockPos.y + 2.8 && entity.y > blockPos.y - 2.8 && !isPositionInSmoke(
                     this.level(), entity.position(),
                 )
             }
