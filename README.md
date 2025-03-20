@@ -90,3 +90,7 @@ fov_effect_amount = 0.12
 ## Acknowledgments
 - [MinecraftForge/MinecraftForge: Modifications to the Minecraft base files to assist in compatibility between mods](https://github.com/MinecraftForge/MinecraftForge)
 - [thedarkcolour/KotlinForForge: Makes Kotlin forge-friendly.](https://github.com/thedarkcolour/KotlinForForge)
+
+## Contributor
+- Programm: [@yurinekoai](https://github.com/yurinekoai)
+- Assets: [@Dragonzhi](https://github.com/Dragonzhi)
