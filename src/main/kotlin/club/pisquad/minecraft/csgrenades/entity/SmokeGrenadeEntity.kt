@@ -162,7 +162,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 bb
             ) {
                 it.entityData.get(isExplodedAccessor) && it.getSpreadBlocks()
-                    .any { pos -> pos.center.distanceToSqr(this.position()) < 1 }
+                    .any { pos -> pos.above().center.distanceToSqr(this.position()) < 2 }
             }
         }
 
