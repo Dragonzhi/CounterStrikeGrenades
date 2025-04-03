@@ -43,10 +43,12 @@ abstract class AbstractFireGrenade(
     private var poppedInAir = false
     private var spreadBlocks: MutableList<BlockPos> = mutableListOf()
     private var entitiesLastInRange: MutableMap<UUID, Long> = mutableMapOf()
+    private var lastInWater: Boolean = false
 
     init {
         hitBlockSound = ModSoundEvents.INCENDIARY_BOUNCE.get()
         throwSound = ModSoundEvents.INCENDIARY_THROW.get()
+        this.lastInWater = isCurrentInWater()
     }
 
     companion object {
@@ -90,16 +92,16 @@ abstract class AbstractFireGrenade(
                 this.kill()
             }
         }
-        if (!this.isInWater) {
-            if (this.deltaMovement.snapToAxis() == Direction.DOWN) {
-                val nextPosition = this.position().add(this.deltaMovement)
-                val nextBlockPos = BlockPos.containing(nextPosition)
-                val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
-                if (isNextBlockPosInWater) {
-                    this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
-                }
+        if (!this.lastInWater && this.deltaMovement.snapToAxis() == Direction.DOWN) {
+            val nextPosition = this.position().add(this.deltaMovement)
+            val nextBlockPos = BlockPos.containing(nextPosition)
+            val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
+            if (isNextBlockPosInWater) {
+                this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
+                this.deltaMovement = Vec3.ZERO
             }
         }
+        this.lastInWater = this.isCurrentInWater()
     }
 
     override fun onHitBlock(result: BlockHitResult) {
@@ -152,6 +154,10 @@ abstract class AbstractFireGrenade(
         super.onHitBlock(result)
     }
 
+    private fun isCurrentInWater(): Boolean {
+        return !this.level().getBlockState(this.blockPosition()).fluidState.isEmpty
+    }
+
     fun extinguish() {
         this.extinguished = true
         CsGrenadePacketHandler.INSTANCE.send(
@@ -177,7 +183,9 @@ abstract class AbstractFireGrenade(
             )
         val entitiesInRange = entities.filter { entity ->
             spreadBlocks.any { blockPos ->
-                blockPos.center.horizontalDistanceTo(entity.position()) < 1.0 && entity.y < blockPos.y + 2.8 && entity.y > blockPos.y - 2.8 && !isPositionInSmoke(
+                blockPos.above().center.horizontalDistanceTo(entity.position()) < 0.5 &&
+                        (entity.y < blockPos.y + 2.8 && entity.y > blockPos.y - 2.8)
+                        && !isPositionInSmoke(
                     this.level(), entity.position(),
                 )
             }
@@ -289,7 +297,7 @@ class SpreadPathData(
         if (groundCalculateResult.second == 0) {
             if (level.getBlockState(this.currentPos.above()).isAir) {
                 jumpCount++
-            }else {
+            } else {
                 return false
             }
         }
@@ -312,7 +320,7 @@ class SpreadPathData(
 private object FireSpreadCalculator {
 
     fun calculate(level: Level, origin: BlockPos): List<BlockPos> {
-        val originBlockState = level.getBlockState(origin)
+        val originBlockState = level.getBlockState(origin.above())
         if (!originBlockState.fluidState.isEmpty) {
             return listOf()
         }
