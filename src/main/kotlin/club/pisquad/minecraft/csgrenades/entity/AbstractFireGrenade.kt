@@ -91,15 +91,14 @@ abstract class AbstractFireGrenade(
             }
         }
         if (!this.isInWater) {
-            if (this.deltaMovement.snapToAxis() == Direction.DOWN) {
-                val nextPosition = this.position().add(this.deltaMovement)
-                val nextBlockPos = BlockPos.containing(nextPosition)
-                val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
-                if (isNextBlockPosInWater) {
-                    this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
-                }
+            val nextPosition = this.position().add(this.deltaMovement)
+            val nextBlockPos = BlockPos.containing(nextPosition)
+            val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
+            if (isNextBlockPosInWater) {
+                this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
             }
         }
+
     }
 
     override fun onHitBlock(result: BlockHitResult) {
@@ -289,7 +288,7 @@ class SpreadPathData(
         if (groundCalculateResult.second == 0) {
             if (level.getBlockState(this.currentPos.above()).isAir) {
                 jumpCount++
-            }else {
+            } else {
                 return false
             }
         }
@@ -312,7 +311,7 @@ class SpreadPathData(
 private object FireSpreadCalculator {
 
     fun calculate(level: Level, origin: BlockPos): List<BlockPos> {
-        val originBlockState = level.getBlockState(origin)
+        val originBlockState = level.getBlockState(origin.above())
         if (!originBlockState.fluidState.isEmpty) {
             return listOf()
         }
