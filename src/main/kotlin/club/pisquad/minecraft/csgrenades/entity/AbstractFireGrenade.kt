@@ -175,6 +175,7 @@ abstract class AbstractFireGrenade(
         val level = this.level() as ServerLevel
         val damageSource = this.getDamageSource()
         val spreadBlocks = this.entityData.get(spreadBlocksAccessor) ?: return
+        println(spreadBlocks)
 
         val entities =
             level.getEntitiesOfClass(
@@ -183,7 +184,7 @@ abstract class AbstractFireGrenade(
             )
         val entitiesInRange = entities.filter { entity ->
             spreadBlocks.any { blockPos ->
-                blockPos.above().center.horizontalDistanceTo(entity.position()) < 0.5 &&
+                blockPos.above().center.horizontalDistanceTo(entity.position()) < 1 &&
                         (entity.y < blockPos.y + 2.8 && entity.y > blockPos.y - 2.8)
                         && !isPositionInSmoke(
                     this.level(), entity.position(),
@@ -222,6 +223,7 @@ abstract class AbstractFireGrenade(
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
 
             entity.hurt(damageSource, damage)
+            println("Dealing $damage")
             entity.invulnerableTime = 10
 
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
@@ -335,8 +337,7 @@ private object FireSpreadCalculator {
             }
             result.addAll(pathData.visited)
         }
-        return result.distinct().map { it.below() }
-            .filter { it.horizontalDistanceTo(origin) < ModConfig.FireGrenade.FIRE_RANGE.get() }
+        return result.distinct().filter { it.horizontalDistanceTo(origin) < ModConfig.FireGrenade.FIRE_RANGE.get() }
     }
 }
 
