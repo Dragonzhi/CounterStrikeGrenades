@@ -175,7 +175,6 @@ abstract class AbstractFireGrenade(
         val level = this.level() as ServerLevel
         val damageSource = this.getDamageSource()
         val spreadBlocks = this.entityData.get(spreadBlocksAccessor) ?: return
-        println(spreadBlocks)
 
         val entities =
             level.getEntitiesOfClass(
@@ -223,7 +222,6 @@ abstract class AbstractFireGrenade(
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
 
             entity.hurt(damageSource, damage)
-            println("Dealing $damage")
             entity.invulnerableTime = 10
 
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
