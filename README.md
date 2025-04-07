@@ -109,6 +109,8 @@ damage_non_player_entity = true
 ## Acknowledgments
 - [MinecraftForge/MinecraftForge: Modifications to the Minecraft base files to assist in compatibility between mods](https://github.com/MinecraftForge/MinecraftForge)
 - [thedarkcolour/KotlinForForge: Makes Kotlin forge-friendly.](https://github.com/thedarkcolour/KotlinForForge)
+- CI
+  - [cloudnode-pro/modrinth-publish: A GitHub Action for publishing plugin versions to Modrinth](https://github.com/cloudnode-pro/modrinth-publish)
 
 ## Contributor
 - Programm: [@yurinekoai](https://github.com/yurinekoai)
