@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category":"equipment",
+  "pattern": [
+    " C ",
+    "XXX",
+    " C "
+  ],
+  "key": {
+    "X": {"item":"minecraft:gunpowder"},
+    "C": {"item":"minecraft:glass"}
+  },
+  "result": {
+    "item": "csgrenades:molotov",
+    "count":2
+  }
+}

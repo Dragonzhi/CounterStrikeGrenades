@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category":"equipment",
+  "pattern": [
+    " _ ",
+    "CXC",
+    " _ "
+  ],
+  "key": {
+    "_": {"item":"minecraft:iron_ingot"},
+    "X": {"item":"minecraft:gunpowder"},
+    "C": {"item":"minecraft:coal"}
+  },
+  "result": {
+    "item": "csgrenades:smokegrenade",
+    "count":2
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category":"equipment",
+  "pattern": [
+    " _ ",
+    "BXB",
+    " _ "
+  ],
+  "key": {
+    "_": {"item":"minecraft:iron_ingot"},
+    "X": {"item":"minecraft:gunpowder"},
+    "B": {"item":"minecraft:bone_meal"}
+  },
+  "result": {
+    "item": "csgrenades:flashbang",
+    "count":2
+  }
+}

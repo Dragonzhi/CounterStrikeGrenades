@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category":"equipment",
+  "pattern": [
+    " C ",
+    "XXX",
+    " C "
+  ],
+  "key": {
+    "X": {"item":"minecraft:gunpowder"},
+    "C": {"item":"minecraft:copper_ingot"}
+  },
+  "result": {
+    "item": "csgrenades:incendiary",
+    "count":2
+  }
+}
