@@ -27,6 +27,9 @@ This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
 - [ ] Decoy
 - [ ] 3D Models
 
+## Recipes
+<p align="center"><img src="assets/recipes.png" width="500" height="450"></p>
+
 ## Config
 In version `1.2.*` or later, you can customize this mod's behavior via [Forge's server side config](https://docs.minecraftforge.net/en/1.20.1/misc/config/#registering-a-configuration).
 
