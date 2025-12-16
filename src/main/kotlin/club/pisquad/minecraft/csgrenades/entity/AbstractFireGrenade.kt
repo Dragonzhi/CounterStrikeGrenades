@@ -71,6 +71,10 @@ abstract class AbstractFireGrenade(
             }
         } else {
             if (this.entityData.get(isExplodedAccessor)) {
+                // [注释] 燃烧弹/瓶爆炸后，实体必须继续存在，以处理持续伤害(doDamage)并作为火焰粒子效果的锚点。
+                // 它会在其生命周期(LIFETIME)结束后，由下面的逻辑移除。
+                // 注意：这也导致了其实体模型会在火焰中心持续可见。所有常规的隐形方法(isInvisible, setItem)均尝试失败，
+                // 这意味着该实体可能使用了非常规的渲染管线？
                 // Damage players within range
                 this.doDamage()
 

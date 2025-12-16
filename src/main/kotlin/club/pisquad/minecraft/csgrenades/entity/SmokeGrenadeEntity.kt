@@ -99,6 +99,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                     this.clientRenderEffect()
                 } else {
                     this.entityData.set(spreadBlocksAccessor, calculateSpreadBlocks())
+                    this.setItem(net.minecraft.world.item.ItemStack.EMPTY)
                 }
                 this.entityData.set(isExplodedAccessor, true)
                 this.explosionTime = Instant.now()
