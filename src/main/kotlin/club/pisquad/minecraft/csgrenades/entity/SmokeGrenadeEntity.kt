@@ -215,7 +215,8 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 getSpaceBelow(it)
             )
         }
-        return (initialSmoke + fallDownSmoke).distinct()
+        // Optimization: Use a Set to efficiently combine and find distinct blocks.
+        return initialSmoke.union(fallDownSmoke).toList()
     }
 
     private fun getSpaceBelow(position: BlockPos): List<BlockPos> {
@@ -260,10 +261,11 @@ private class SmokeGrenadeSpreadBlockCalculator(
     val origin: BlockPos,
 ) {
 
-    fun calculate(level: Level): List<BlockPos> {
-        val blocks = mutableListOf<BlockPos>()
-        var generatedInLastCycle = mutableListOf<BlockPos>(origin)
-        var generatedInCurrentCycle = mutableListOf<BlockPos>()
+    // Optimization: Use Sets instead of Lists to avoid duplicates from the start.
+    fun calculate(level: Level): Set<BlockPos> {
+        val blocks = mutableSetOf<BlockPos>()
+        var generatedInLastCycle = mutableSetOf<BlockPos>(origin)
+        var generatedInCurrentCycle = mutableSetOf<BlockPos>()
         repeat(generateCycle) {
             repeat(blockPerCycle) {
                 generatedInLastCycle.random().let {
@@ -276,9 +278,9 @@ private class SmokeGrenadeSpreadBlockCalculator(
             }
             blocks.addAll(generatedInLastCycle)
             generatedInLastCycle = generatedInCurrentCycle
-            generatedInCurrentCycle = mutableListOf()
+            generatedInCurrentCycle = mutableSetOf()
         }
-        return blocks.distinct()
+        return blocks
     }
 
     private fun randomMoveOnce(level: Level, blockPos: BlockPos): BlockPos {
