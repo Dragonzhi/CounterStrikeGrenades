@@ -35,29 +35,24 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
     }
 
     override fun tick() {
+        if (this.entityData.get(isExplodedAccessor)) {
+            if (!this.level().isClientSide) { // Server-side removal
+                this.discard()
+            }
+            return // Stop further processing
+        }
+
         super.tick()
 
         // Explosion logic
-        if (getTimeFromTickCount(this.tickCount.toDouble()) > 2.5 && !this.entityData.get(isExplodedAccessor)) {
+        if (getTimeFromTickCount(this.tickCount.toDouble()) > 2.5) { // isExploded is checked at the beginning
             if (!this.level().isClientSide) { // Server
                 this.doDamage()
-                // [注释] 这是一个解决模型渲染问题的非常规方案 (Teleport Hack)。
-                // 因为常规的隐形方法(isInvisible)对该实体无效，所以在爆炸时，服务器将实体传送到地底深处，
-                // 使其在视觉上消失。但实体本身会继续存在一段时间，以作为粒子效果的“锚点”。
-                this.setPos(this.x, -1000.0, this.z) // Teleport away
             } else { // Client
                 HEGrenadeRenderManager.render(HEGrenadeExplosionData(this.position()))
                 this.blowUpNearbySmokeGrenade()
             }
             this.entityData.set(isExplodedAccessor, true)
-        }
-
-        // Delayed removal on server
-        // [注释] 爆炸若干秒后，服务器会将实体彻底移除。这个延迟是为了确保客户端有足够的时间播放完粒子效果。
-        if (this.entityData.get(isExplodedAccessor) && getTimeFromTickCount(this.tickCount.toDouble()) > 4.5) { // 2s after explosion
-            if (!this.level().isClientSide) {
-                this.discard()
-            }
         }
     }
 
