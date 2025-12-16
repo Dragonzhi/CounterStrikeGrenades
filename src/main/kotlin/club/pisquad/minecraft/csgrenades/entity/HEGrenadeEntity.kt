@@ -37,18 +37,22 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
     override fun tick() {
         super.tick()
 
+        // Explosion logic
         if (getTimeFromTickCount(this.tickCount.toDouble()) > 2.5 && !this.entityData.get(isExplodedAccessor)) {
-            if (this.level() is ServerLevel) {
+            if (!this.level().isClientSide) { // Server
                 this.doDamage()
-            } else {
+                this.setPos(this.x, -1000.0, this.z) // Teleport away
+            } else { // Client
                 HEGrenadeRenderManager.render(HEGrenadeExplosionData(this.position()))
                 this.blowUpNearbySmokeGrenade()
             }
             this.entityData.set(isExplodedAccessor, true)
         }
-        if (getTimeFromTickCount(this.tickCount.toDouble()) > 5) {
-            if (this.level() is ServerLevel) {
-                this.kill()
+
+        // Delayed removal on server
+        if (this.entityData.get(isExplodedAccessor) && getTimeFromTickCount(this.tickCount.toDouble()) > 4.5) { // 2s after explosion
+            if (!this.level().isClientSide) {
+                this.discard()
             }
         }
     }
