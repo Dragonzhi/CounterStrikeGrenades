@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category":"equipment",
+  "pattern": [
+    " _ ",
+    "BXB",
+    " _ "
+  ],
+  "key": {
+    "_": {"item":"minecraft:iron_ingot"},
+    "X": {"item":"minecraft:gunpowder"},
+    "B": {"item":"minecraft:redstone"}
+  },
+  "result": {
+    "item": "csgrenades:decoy",
+    "count":2
+  }
+}

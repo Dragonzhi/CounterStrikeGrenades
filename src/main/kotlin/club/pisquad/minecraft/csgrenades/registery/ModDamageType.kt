@@ -23,4 +23,6 @@ object ModDamageType {
         ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation(CounterStrikeGrenades.ID, "flashbang_hit"))
     val SMOKEGRENADE_HIT: ResourceKey<DamageType> =
         ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation(CounterStrikeGrenades.ID, "smokegrenade_hit"))
+    val DECOY_GRENADE_HIT: ResourceKey<DamageType> =
+        ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation(CounterStrikeGrenades.ID, "decoy_hit"))
 }

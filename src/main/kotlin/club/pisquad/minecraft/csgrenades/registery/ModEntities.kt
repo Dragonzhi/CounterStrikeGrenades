@@ -55,4 +55,12 @@ object ModEntities {
             .build(ResourceLocation(CounterStrikeGrenades.ID, "molotov").toString())
     }
 
+    val DECOY_GRENADE_ENTITY: RegistryObject<EntityType<DecoyGrenadeEntity>> = ENTITIES.register("decoy") {
+        EntityType.Builder.of(
+            { pEntityType: EntityType<DecoyGrenadeEntity>, pLevel: Level -> DecoyGrenadeEntity(pEntityType, pLevel) },
+            MobCategory.MISC
+        ).sized(GRENADE_ENTITY_SIZE, GRENADE_ENTITY_SIZE)
+            .build(ResourceLocation(CounterStrikeGrenades.ID, "decoy").toString())
+    }
+    
 }

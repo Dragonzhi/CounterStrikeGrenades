@@ -219,6 +219,19 @@ fun throwAction(throwSpeed: Double, grenadeType: GrenadeType) {
                 )
         )
         .length()
+
+    // --- NBT Reading Logic for Decoy ---
+    var customSound: String? = null
+    if (grenadeType == GrenadeType.DECOY_GRENADE) {
+        val itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND)
+        val tag = itemInHand.tag
+        // 8 is the NBT tag ID for String
+        if (tag != null && tag.contains("DecoySound", 8)) {
+            customSound = tag.getString("DecoySound")
+        }
+    }
+    // --- End NBT Reading ---
+
     CsGrenadePacketHandler.INSTANCE.sendToServer(
         GrenadeThrownMessage(
             player.uuid,
@@ -226,6 +239,7 @@ fun throwAction(throwSpeed: Double, grenadeType: GrenadeType) {
             grenadeType,
             player.eyePosition,
             Rotations(player.xRot, player.yRot, 0.0f),
+            customSound
         )
     )
 }
