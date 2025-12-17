@@ -106,15 +106,12 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
     private fun playDefaultSound() {
         val footstepSounds = arrayOf(
-            SoundEvents.BLASTFURNACE_FIRE_CRACKLE,
-            SoundEvents.SHULKER_BULLET_HIT,
-            SoundEvents.SHULKER_HURT,
-            SoundEvents.SHULKER_SHOOT,
-            SoundEvents.SHULKER_TELEPORT,
-            SoundEvents.SHULKER_BULLET_HIT,
-            SoundEvents.SHULKER_OPEN,
-            SoundEvents.SHULKER_CLOSE,
-            SoundEvents.SHULKER_DEATH,
+            SoundEvents.CREEPER_HURT,
+            SoundEvents.CREEPER_DEATH,
+            SoundEvents.CREEPER_PRIMED,
+            SoundEvents.FIREWORK_ROCKET_BLAST,
+            SoundEvents.CHICKEN_HURT,
+            SoundEvents.CHICKEN_AMBIENT
         )
         val randomSoundHolder = footstepSounds[Random.nextInt(footstepSounds.size)]
         level().playSound(null, this.blockPosition(), randomSoundHolder, SoundSource.PLAYERS, 1.0f, 1.0f)
