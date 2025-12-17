@@ -22,6 +22,10 @@ object SoundListener {
             return
         }
 
+        // --- TEMPORARY DEBUGGING ---
+        println("CS-GRENADES SOUND_DEBUG: Source=${sound.source}, Location=${sound.location}")
+        // --- END DEBUGGING ---
+
         val soundLocation = sound.location
         val taczNamespace = "tacz"
 

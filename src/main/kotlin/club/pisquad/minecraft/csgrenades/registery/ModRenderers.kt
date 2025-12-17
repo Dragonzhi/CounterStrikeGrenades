@@ -16,5 +16,6 @@ object ModRenderers {
         EntityRenderers.register(ModEntities.HEGRENADE_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.INCENDIARY_ENTITY.get(), ::ThrownItemRenderer)
         EntityRenderers.register(ModEntities.MOLOTOV_ENTITY.get(), ::ThrownItemRenderer)
+        EntityRenderers.register(ModEntities.DECOY_GRENADE_ENTITY.get(), ::ThrownItemRenderer)
     }
 }

@@ -2,9 +2,12 @@ package club.pisquad.minecraft.csgrenades.entity
 
 import club.pisquad.minecraft.csgrenades.client.SoundListener
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
+import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
+import net.minecraft.core.registries.Registries
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
@@ -34,7 +37,7 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
         if (activationTick == null) {
             // Check for landing and activation
-            if (this.entityData.get(isLandedAccessor) && this.velocity.lengthSqr() < 0.01) {
+            if (this.entityData.get(isLandedAccessor) && this.getDeltaMovement().lengthSqr() < 0.01) {
                 activationTick = this.tickCount
                 scheduleNextSound()
             }
@@ -53,6 +56,14 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 endOfLifeExplosion()
             }
         }
+    }
+
+    override fun getHitDamageSource(): DamageSource {
+        val registryAccess = this.level().registryAccess()
+        return DamageSource(
+            registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.DECOY_GRENADE_HIT),
+            this
+        )
     }
 
     private fun scheduleNextSound() {
