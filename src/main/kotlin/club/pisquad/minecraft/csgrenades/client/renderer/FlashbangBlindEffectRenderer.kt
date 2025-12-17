@@ -4,6 +4,7 @@ import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.network.message.FlashbangEffectData
+import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
 import club.pisquad.minecraft.csgrenades.sound.FlashbangRingSound
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
@@ -86,6 +87,13 @@ object FlashbangBlindEffectRenderer {
 
         // Also allow the vanilla UI button click sound, it feels better.
         if (sound.location == SoundEvents.UI_BUTTON_CLICK.get().location) {
+            return
+        }
+
+        // Allow the flashbang's own explosion sounds to play.
+        val flashExplode = ModSoundEvents.FLASHBANG_EXPLODE.get()
+        val flashExplodeDistant = ModSoundEvents.FLASHBANG_EXPLODE_DISTANT.get()
+        if (sound.location == flashExplode.location || sound.location == flashExplodeDistant.location) {
             return
         }
 
