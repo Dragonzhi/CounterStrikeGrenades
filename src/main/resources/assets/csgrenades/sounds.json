@@ -11,6 +11,12 @@
       "csgrenades:common/grenade_throw"
     ]
   },
+  "decoy.draw": {
+    "category": "player",
+    "sounds": [
+      "csgrenades:decoy/decoy_draw"
+    ]
+  },
   "flashbang.draw": {
     "category": "player",
     "sounds": [

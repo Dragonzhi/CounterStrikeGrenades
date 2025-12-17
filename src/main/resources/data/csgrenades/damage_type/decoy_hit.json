@@ -1,0 +1,6 @@
+{
+  "message_id": "csgrenade.decoy_hit",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "death_message_type": "default"
+}

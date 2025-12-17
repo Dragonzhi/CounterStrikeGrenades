@@ -20,4 +20,6 @@ object ModItems {
     val INCENDIARY_ITEM: RegistryObject<Item> = ITEMS.register("incendiary") { IncendiaryItem(Item.Properties()) }
 
     val MOLOTOV_ITEM: RegistryObject<Item> = ITEMS.register("molotov") { MolotovItem(Item.Properties()) }
+
+    val DECOY_GRENADE_ITEM: RegistryObject<Item> = ITEMS.register("decoy") { DecoyGrenadeItem(Item.Properties()) }
 }
