@@ -67,15 +67,15 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     fun clearSmokeWithinRange(position: Vec3, range: Double, printHeader: Boolean) {
-        // if (printHeader) {
-        //     println("CS-GRENADES DEBUG: Clearing smoke at pos: $position with range: $range. Checking ALL particles.")
-        //     val totalParticles = this.particles.values.sumOf { it.size }
-        //     println("CS-GRENADES DEBUG: Total particles in map: $totalParticles")
-        //     if (totalParticles == 0) {
-        //         println("CS-GRENADES DEBUG: Cleared 0 particles because the map is empty.")
-        //         return // Nothing to do
-        //     }
-        // }
+        if (printHeader) {
+            println("CS-GRENADES DEBUG: Clearing smoke at pos: $position with range: $range. Checking ALL particles.")
+            val totalParticles = this.particles.values.sumOf { it.size }
+            println("CS-GRENADES DEBUG: Total particles in map: $totalParticles")
+            if (totalParticles == 0) {
+                println("CS-GRENADES DEBUG: Cleared 0 particles because the map is empty.")
+                return // Nothing to do
+            }
+        }
 
         var clearedCount = 0
         var checkedCount = 0 // To avoid spamming logs
@@ -85,10 +85,10 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             // Iterate over each particle in the list
             particleList.forEach { particle ->
                 // New Debugging: Print first few particle positions
-                // if (printHeader && checkedCount < 5) {
-                //     val dist = particle.pos.distanceTo(position)
-                //     println("CS-GRENADES DEBUG:   - Checking particle at ${particle.pos}, distance to bullet: $dist")
-                // }
+                if (printHeader && checkedCount < 5) {
+                    val dist = particle.pos.distanceTo(position)
+                    println("CS-GRENADES DEBUG:   - Checking particle at ${particle.pos}, distance to bullet: $dist")
+                }
                 checkedCount++
 
                 // Directly check the distance between the bullet and the particle
@@ -100,7 +100,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         }
 
         if (clearedCount > 0) {
-            // println("CS-GRENADES DEBUG: Cleared $clearedCount particles at interpolated position.")
+            println("CS-GRENADES DEBUG: Cleared $clearedCount particles at interpolated position.")
         }
     }
 
@@ -159,21 +159,28 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         }
 
         // --- Vanilla Arrow Logic ---
-        var smokeBB = AABB(this.blockPosition()).inflate(10.0) // Use a larger BB to find arrows near the cloud
+        // A large bounding box to catch any arrows that might be nearby. The swept BB check is more precise.
+        val searchBB = this.boundingBox.inflate(64.0)
         val nearbyArrows = this.level().getEntitiesOfClass(
             net.minecraft.world.entity.projectile.AbstractArrow::class.java,
-            smokeBB
+            searchBB
         ) { arrow -> arrow.deltaMovement.lengthSqr() > 0.01 } // Only consider moving arrows
 
+        val smokeCloudBoundingBox = AABB(BlockPos.containing(this.position())).inflate(ModConfig.SmokeGrenade.SMOKE_RADIUS.get().toDouble())
+
         nearbyArrows.forEach { arrow ->
-            // Interpolate position to prevent tunneling
-            val posNow = arrow.position()
+            // Use a "swept" bounding box to detect fast-moving entities that pass through the cloud in a single tick.
             val delta = arrow.deltaMovement
-            val posOld = posNow.subtract(delta)
-            if (delta.lengthSqr() < 0.001) {
-                this.clearSmokeWithinRange(posNow, ModConfig.SmokeGrenade.ARROW_CLEAR_RANGE.get(), true)
-            } else {
-                val steps = (delta.length() / 0.5).toInt().coerceAtLeast(1).coerceAtMost(10) // Check every 50cm
+            val currentBB = arrow.boundingBox
+            val oldBB = currentBB.move(-delta.x, -delta.y, -delta.z)
+            val sweptBB = currentBB.minmax(oldBB)
+
+            if (smokeCloudBoundingBox.intersects(sweptBB)) {
+                println("CS-GRENADES DEBUG: Swept BB intersection SUCCESS for Arrow.")
+                // Interpolate position to prevent tunneling
+                val posNow = arrow.position()
+                val posOld = posNow.subtract(delta)
+                val steps = (delta.length() / 0.5).toInt().coerceAtLeast(1).coerceAtMost(30) // Check every 50cm, with a higher cap
                 for (i in 0..steps) {
                     val interpolatedPos = posOld.lerp(posNow, i.toDouble() / steps)
                     this.clearSmokeWithinRange(interpolatedPos, ModConfig.SmokeGrenade.ARROW_CLEAR_RANGE.get(), i == 0)
@@ -191,25 +198,33 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             }
 
             val smokeCenter = this.position()
-            allRenderEntities.forEach { entity ->
-                if (entity.position().distanceToSqr(smokeCenter) < 225) { // Pre-filter to check entities within 15 blocks
-                    // println("CS-GRENADES DEBUG: Nearby entity in radius: ${entity::class.java.name}") // Re-added for debugging new gun packs
-                    if (entity::class.java.name == "com.tacz.guns.entity.EntityKineticBullet") {
-                        // println("CS-GRENADES DEBUG:     ^ FINAL MATCH! This is the bullet. Clearing smoke.")
+            val smokeRadius = ModConfig.SmokeGrenade.SMOKE_RADIUS.get().toDouble()
+            val smokeCloudBoundingBox = AABB(BlockPos.containing(smokeCenter)).inflate(smokeRadius)
 
-                        // Interpolate position to prevent tunneling
+            allRenderEntities.forEach { entity ->
+                // Use a "swept" bounding box to detect fast-moving entities that pass through the cloud in a single tick.
+                val delta = entity.deltaMovement
+                // If the entity hasn't moved, we don't need to check it.
+                if (delta.lengthSqr() == 0.0) return@forEach
+
+                val currentBB = entity.boundingBox
+                val oldBB = currentBB.move(-delta.x, -delta.y, -delta.z)
+                val sweptBB = currentBB.minmax(oldBB)
+
+                // Check if the swept path intersects the smoke cloud
+                if (smokeCloudBoundingBox.intersects(sweptBB)) {
+                    if (entity::class.java.name == "com.tacz.guns.entity.EntityKineticBullet") {
+                        println("CS-GRENADES DEBUG: Swept BB intersection SUCCESS for Kinetic Bullet.")
+
                         val posNow = entity.position()
-                        val delta = entity.deltaMovement
+                        val finalClearRange = ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get()
                         val posOld = posNow.subtract(delta)
 
-                        if (delta.lengthSqr() < 0.001) {
-                            this.clearSmokeWithinRange(posNow, ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get(), true)
-                        } else {
-                            val steps = (delta.length() / 0.5).toInt().coerceAtLeast(1).coerceAtMost(10) // Check every 50cm
-                            for (i in 0..steps) {
-                                val interpolatedPos = posOld.lerp(posNow, i.toDouble() / steps)
-                                this.clearSmokeWithinRange(interpolatedPos, ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get(), i == 0)
-                            }
+                        // Interpolation logic remains the same
+                        val steps = (delta.length() / 0.5).toInt().coerceAtLeast(1).coerceAtMost(30)
+                        for (i in 0..steps) {
+                            val interpolatedPos = posOld.lerp(posNow, i.toDouble() / steps)
+                            this.clearSmokeWithinRange(interpolatedPos, finalClearRange, i == 0)
                         }
                     }
                 }
