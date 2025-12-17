@@ -67,15 +67,15 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     fun clearSmokeWithinRange(position: Vec3, range: Double, printHeader: Boolean) {
-        // if (printHeader) {
-        //     println("CS-GRENADES DEBUG: Clearing smoke at pos: $position with range: $range. Checking ALL particles.")
-        //     val totalParticles = this.particles.values.sumOf { it.size }
-        //     println("CS-GRENADES DEBUG: Total particles in map: $totalParticles")
-        //     if (totalParticles == 0) {
-        //         println("CS-GRENADES DEBUG: Cleared 0 particles because the map is empty.")
-        //         return // Nothing to do
-        //     }
-        // }
+        if (printHeader) {
+            println("CS-GRENADES DEBUG: Clearing smoke at pos: $position with range: $range. Checking ALL particles.")
+            val totalParticles = this.particles.values.sumOf { it.size }
+            println("CS-GRENADES DEBUG: Total particles in map: $totalParticles")
+            if (totalParticles == 0) {
+                println("CS-GRENADES DEBUG: Cleared 0 particles because the map is empty.")
+                return // Nothing to do
+            }
+        }
 
         var clearedCount = 0
         var checkedCount = 0 // To avoid spamming logs
@@ -85,10 +85,10 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             // Iterate over each particle in the list
             particleList.forEach { particle ->
                 // New Debugging: Print first few particle positions
-                // if (printHeader && checkedCount < 5) {
-                //     val dist = particle.pos.distanceTo(position)
-                //     println("CS-GRENADES DEBUG:   - Checking particle at ${particle.pos}, distance to bullet: $dist")
-                // }
+                if (printHeader && checkedCount < 5) {
+                    val dist = particle.pos.distanceTo(position)
+                    println("CS-GRENADES DEBUG:   - Checking particle at ${particle.pos}, distance to bullet: $dist")
+                }
                 checkedCount++
 
                 // Directly check the distance between the bullet and the particle
@@ -100,7 +100,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         }
 
         if (clearedCount > 0) {
-            // println("CS-GRENADES DEBUG: Cleared $clearedCount particles at interpolated position.")
+            println("CS-GRENADES DEBUG: Cleared $clearedCount particles at interpolated position.")
         }
     }
 
@@ -193,22 +193,40 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             val smokeCenter = this.position()
             allRenderEntities.forEach { entity ->
                 if (entity.position().distanceToSqr(smokeCenter) < 225) { // Pre-filter to check entities within 15 blocks
-                    // println("CS-GRENADES DEBUG: Nearby entity in radius: ${entity::class.java.name}") // Re-added for debugging new gun packs
+                    println("CS-GRENADES DEBUG: Nearby entity in radius: ${entity::class.java.name}") // Re-added for debugging new gun packs
                     if (entity::class.java.name == "com.tacz.guns.entity.EntityKineticBullet") {
-                        // println("CS-GRENADES DEBUG:     ^ FINAL MATCH! This is the bullet. Clearing smoke.")
+                        println("CS-GRENADES DEBUG:     ^ FINAL MATCH! This is the bullet. Clearing smoke.")
+
+                        val posNow = entity.position()
+
+                        // --- Reflection for Dynamic Range ---
+                        var finalClearRange = ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get() // Default/fallback value
+                        try {
+                            // 1. Get the getDamage(Vec3) method from the bullet entity
+                            val getDamageMethod = entity::class.java.getMethod("getDamage", Vec3::class.java)
+                            // 2. Invoke it to get the damage value
+                            val damage = getDamageMethod.invoke(entity, posNow) as Float
+                            // 3. Calculate a dynamic range based on damage
+                            // Formula: base_range + (damage/damage_divisor), clamped to a min/max
+                            val calculatedRange = (1.0 + (damage / 15.0f)).coerceIn(0.5, 5.0)
+                            finalClearRange = calculatedRange
+                            println("CS-GRENADES DEBUG: Bullet Damage: $damage -> Calculated Range: $finalClearRange")
+                        } catch (e: Exception) {
+                            println("CS-GRENADES DEBUG: Could not get dynamic damage via reflection, falling back to config value. Reason: ${e.message}")
+                        }
+                        // --- End Reflection ---
 
                         // Interpolate position to prevent tunneling
-                        val posNow = entity.position()
                         val delta = entity.deltaMovement
                         val posOld = posNow.subtract(delta)
 
                         if (delta.lengthSqr() < 0.001) {
-                            this.clearSmokeWithinRange(posNow, ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get(), true)
+                            this.clearSmokeWithinRange(posNow, finalClearRange, true)
                         } else {
                             val steps = (delta.length() / 0.5).toInt().coerceAtLeast(1).coerceAtMost(10) // Check every 50cm
                             for (i in 0..steps) {
                                 val interpolatedPos = posOld.lerp(posNow, i.toDouble() / steps)
-                                this.clearSmokeWithinRange(interpolatedPos, ModConfig.SmokeGrenade.BULLET_CLEAR_RANGE.get(), i == 0)
+                                this.clearSmokeWithinRange(interpolatedPos, finalClearRange, i == 0)
                             }
                         }
                     }
