@@ -1,11 +1,11 @@
 package club.pisquad.minecraft.csgrenades.entity
 
-import club.pisquad.minecraft.csgrenades.client.SoundListener
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
 import net.minecraft.core.registries.Registries
 import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
@@ -71,12 +71,13 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     private fun playSoundLogic() {
-        val soundToPlay = SoundListener.lastPlayerGunSound
-        if (soundToPlay != null) {
-            val soundEvent = SoundEvent.createVariableRangeEvent(soundToPlay)
-            level().playSound(null, this.x, this.y, this.z, soundEvent, SoundSource.PLAYERS, 1.0f, 1.0f)
-        }
-        // If soundToPlay is null, it remains silent, as per our design.
+        val footstepSounds = arrayOf(
+            SoundEvents.STEM_STEP,
+        )
+        val randomSoundHolder = footstepSounds[Random.nextInt(footstepSounds.size)]
+
+        // Play the selected random footstep sound using the Holder directly
+        level().playSound(null, this.blockPosition(), randomSoundHolder, SoundSource.PLAYERS, 1.0f, 1.0f)
     }
 
     private fun endOfLifeExplosion() {
