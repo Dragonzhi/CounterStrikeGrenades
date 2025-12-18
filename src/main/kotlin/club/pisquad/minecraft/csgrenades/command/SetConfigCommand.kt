@@ -13,6 +13,7 @@ object SetConfigCommand {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         val command: LiteralArgumentBuilder<CommandSourceStack> = Commands.literal("csgrenades")
             .requires { source -> source.hasPermission(2) }
+            // Branch for grenade-specific settings
             .then(
                 Commands.argument("grenadeType", StringArgumentType.string())
                     .suggests { _, builder ->
@@ -29,7 +30,7 @@ object SetConfigCommand {
                                         builder.buildFuture()
                                     }
                                     .executes { context ->
-                                        execute(
+                                        setGrenadeSpecificConfig(
                                             context,
                                             StringArgumentType.getString(context, "grenadeType"),
                                             StringArgumentType.getString(context, "value")
@@ -38,10 +39,33 @@ object SetConfigCommand {
                             )
                     )
             )
+            // Branch for global settings
+            .then(
+                Commands.literal("global")
+                    .then(
+                        Commands.literal("ignoreBarrierBlock")
+                            .then(
+                                Commands.argument("value", com.mojang.brigadier.arguments.BoolArgumentType.bool())
+                                    .executes { context ->
+                                        setGlobalIgnoreBarrier(context, com.mojang.brigadier.arguments.BoolArgumentType.getBool(context, "value"))
+                                    }
+                            )
+                    )
+            )
         dispatcher.register(command)
     }
 
-    private fun execute(context: CommandContext<CommandSourceStack>, grenadeType: String, value: String): Int {
+    private fun setGlobalIgnoreBarrier(context: CommandContext<CommandSourceStack>, value: Boolean): Int {
+        ModConfig.IGNORE_BARRIER_BLOCK.set(value)
+        ModConfig.SPEC.save()
+        context.source.sendSuccess(
+            { Component.literal("Set global ignoreBarrierBlock to $value") },
+            true
+        )
+        return 1
+    }
+
+    private fun setGrenadeSpecificConfig(context: CommandContext<CommandSourceStack>, grenadeType: String, value: String): Int {
         val source = context.source
         val configValue = try {
             ModConfig.SelfDamageSetting.valueOf(value.uppercase())

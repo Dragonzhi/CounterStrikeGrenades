@@ -81,7 +81,7 @@ data class FlashbangEffectData(
 
         private fun getBlockingFactor(level: Level, flashbangPos: Vec3, playerEyePos: Vec3): Double {
             val context =
-                ClipContext(playerEyePos, flashbangPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null)
+                ClipContext(playerEyePos, flashbangPos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, null)
             val result = level.clip(context)
             return if (result.type.equals(HitResult.Type.MISS)) 1.0 else 0.0
         }
