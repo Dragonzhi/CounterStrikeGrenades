@@ -1,5 +1,5 @@
 {
-  "message_id": "csgrenade.incendiary_hit",
+  "message_id": "csgrenades.incendiary_hit",
   "scaling": "never",
   "exhaustion": 0.1,
   "death_message_type": "default",

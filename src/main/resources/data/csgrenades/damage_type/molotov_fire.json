@@ -1,5 +1,5 @@
 {
-  "message_id": "csgrenade.molotov_fire",
+  "message_id": "csgrenades.molotov_fire",
   "scaling": "never",
   "exhaustion": 0.1,
   "effects": "burning",
