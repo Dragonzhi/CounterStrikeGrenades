@@ -73,7 +73,8 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.DECOY_GRENADE_HIT),
-            this
+            this,
+            this.owner
         )
     }
 

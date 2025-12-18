@@ -128,7 +128,8 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_HIT),
-            this
+            this,
+            this.owner
         )
     }
 

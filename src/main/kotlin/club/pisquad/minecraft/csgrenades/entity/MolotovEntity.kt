@@ -28,7 +28,8 @@ class MolotovEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.MOLOTOV_HIT),
-            this
+            this,
+            this.owner
         )
     }
 }

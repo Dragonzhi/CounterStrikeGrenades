@@ -20,7 +20,7 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.INCENDIARY_FIRE),
-            this
+            this.owner
         )
     }
 
@@ -28,7 +28,8 @@ class IncendiaryEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLe
         val registryAccess = this.level().registryAccess()
         return DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.INCENDIARY_HIT),
-            this
+            this,
+            this.owner
         )
     }
 }
