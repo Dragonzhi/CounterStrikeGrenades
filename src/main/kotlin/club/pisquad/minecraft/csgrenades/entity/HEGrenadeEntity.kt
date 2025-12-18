@@ -73,12 +73,6 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
                 AABB(this.blockPosition()).inflate(ModConfig.HEGrenade.DAMAGE_RANGE.get())
             )
         for (entity in entities) {
-            val finalDamageSource = if (entity == this.owner) {
-                selfDamageSource
-            } else {
-                baseDamageSource
-            }
-
             val distance = entity.distanceTo(this).toDouble()
 
             if (distance < damageRange) {
@@ -87,7 +81,17 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
                     val originalKnockBackResistance =
                         entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue ?: 0.0
                     entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
-                    entity.hurt(finalDamageSource, damage.toFloat())
+
+                    if (entity == this.owner) {
+                        when (ModConfig.HEGrenade.CAUSE_DAMAGE_TO_OWNER.get()) {
+                            ModConfig.SelfDamageSetting.NEVER -> { /* Do nothing */ }
+                            ModConfig.SelfDamageSetting.NOT_IN_TEAM -> entity.hurt(baseDamageSource, damage.toFloat())
+                            ModConfig.SelfDamageSetting.ALWAYS -> entity.hurt(selfDamageSource, damage.toFloat())
+                        }
+                    } else {
+                        entity.hurt(baseDamageSource, damage.toFloat())
+                    }
+
                     entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
                 }
             }

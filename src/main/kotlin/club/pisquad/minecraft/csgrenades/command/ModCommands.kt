@@ -7,5 +7,6 @@ object ModCommands {
     @SubscribeEvent
     fun onRegisterCommands(event: RegisterCommandsEvent) {
         RegisterObjectivesCommand.register(event.dispatcher)
+        SetConfigCommand.register(event.dispatcher)
     }
 }

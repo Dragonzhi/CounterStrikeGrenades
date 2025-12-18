@@ -1,0 +1,6 @@
+{
+  "message_id": "csgrenades.hegrenade_explosion.self",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "death_message_type": "default"
+}

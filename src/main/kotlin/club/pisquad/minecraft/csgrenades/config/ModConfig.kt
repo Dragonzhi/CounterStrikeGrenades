@@ -31,6 +31,7 @@ object ModConfig {
         lateinit var BASE_DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_RANGE: ForgeConfigSpec.DoubleValue
         lateinit var HEAD_DAMAGE_BOOST: ForgeConfigSpec.DoubleValue
+        lateinit var CAUSE_DAMAGE_TO_OWNER: ForgeConfigSpec.EnumValue<SelfDamageSetting>
     }
 
     object FireGrenade {
@@ -41,6 +42,11 @@ object ModConfig {
         lateinit var FIRE_MAX_SPREAD_DOWNWARD: ForgeConfigSpec.IntValue
         lateinit var DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_INCREASE_TIME: ForgeConfigSpec.LongValue
+        lateinit var CAUSE_DAMAGE_TO_OWNER: ForgeConfigSpec.EnumValue<SelfDamageSetting>
+    }
+
+    enum class SelfDamageSetting {
+        NEVER, NOT_IN_TEAM, ALWAYS
     }
 
     init {
@@ -88,6 +94,7 @@ object ModConfig {
         HEGrenade.BASE_DAMAGE = builder.defineInRange("base_damage", 30.0, 0.0, 100.0)
         HEGrenade.DAMAGE_RANGE = builder.defineInRange("damage_range", 5.0, 0.0, 100.0)
         HEGrenade.HEAD_DAMAGE_BOOST = builder.defineInRange("head_damage_boost", 1.5, 0.0, 100.0)
+        HEGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
         builder.pop()
 
         builder.push("FireGrenade")
@@ -101,6 +108,7 @@ object ModConfig {
         FireGrenade.DAMAGE = builder.defineInRange("damage", 3.0, 0.0, 100.0)
         builder.comment("In what time should fire damage reach its maximum damage (linearly)")
         FireGrenade.DAMAGE_INCREASE_TIME = builder.defineInRange("damage_increase_time", 2000, 0, 100 * 1000.toLong())
+        FireGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
 
         SPEC = builder.build()
     }
