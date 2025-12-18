@@ -93,6 +93,8 @@ damage_non_player_entity = true
 	damage_range = 5.0
 	#Range: 0.0 ~ 100.0
 	head_damage_boost = 1.5
+	#Allowed values: NEVER, NOT_IN_TEAM, ALWAYS
+	causeDamageToOwner = "ALWAYS"
 
 [FireGrenade]
 	#Range: 0 ~ 100
@@ -112,7 +114,49 @@ damage_non_player_entity = true
 	#In what time should fire damage reach its maximum damage (linearly)
 	#Range: 0 ~ 100000
 	damage_increase_time = 2000
+	#Allowed values: NEVER, NOT_IN_TEAM, ALWAYS
+	causeDamageToOwner = "ALWAYS"
 ```
+
+## Commands
+This mod provides server-side commands to configure grenade behavior in-game. You must have operator permissions (level 2) to use them.
+
+### Set Self-Damage Policy
+You can control whether HE grenades and fire grenades (Incendiary/Molotov) can damage their owner.
+
+**Usage:**
+`/csgrenades <grenadeType> causeDamageToOwner <value>`
+
+-   `<grenadeType>`: The type of grenade to configure.
+    -   `hegrenade`
+    -   `firegrenade`
+-   `<value>`: The self-damage policy.
+    -   `always`: Grenades will always damage their owner. (Default)
+    -   `not_in_team`: Grenades will only damage their owner if team-based friendly fire is enabled.
+    -   `never`: Grenades will never damage their owner.
+
+**Example:**
+`/csgrenades hegrenade causeDamageToOwner never`
+
+### Set Global Settings
+You can configure global settings that affect all grenades.
+
+**Usage:**
+`/csgrenades global <setting> <value>`
+
+-   `<setting>`: The global setting to change.
+    -   `ignoreBarrierBlock`: Controls if grenades pass through barrier blocks.
+-   `<value>`: The value for the setting.
+    -   `true`: Grenades will fly through barrier blocks.
+    -   `false`: Grenades will collide with barrier blocks. (Default)
+
+**Example:**
+`/csgrenades global ignoreBarrierBlock true`
+
+## Localization
+The mod currently supports the following languages:
+-   English (en_us)
+-   简体中文 (zh_cn)
 
 ## Acknowledgments
 - [MinecraftForge/MinecraftForge: Modifications to the Minecraft base files to assist in compatibility between mods](https://github.com/MinecraftForge/MinecraftForge)
