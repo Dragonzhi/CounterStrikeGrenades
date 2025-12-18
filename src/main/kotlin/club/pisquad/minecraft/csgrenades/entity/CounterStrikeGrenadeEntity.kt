@@ -68,7 +68,7 @@ abstract class CounterStrikeGrenadeEntity(
                 entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue ?: 0.0
 
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
-            entity.hurt(this.getHitDamageSource(), 1f)
+            entity.hurt(this.getHitDamageSource(entity), 1f)
 
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
         }
@@ -194,6 +194,6 @@ abstract class CounterStrikeGrenadeEntity(
         return false
     }
 
-    abstract fun getHitDamageSource(): DamageSource
+    abstract fun getHitDamageSource(hitEntity: LivingEntity): DamageSource
 
 }

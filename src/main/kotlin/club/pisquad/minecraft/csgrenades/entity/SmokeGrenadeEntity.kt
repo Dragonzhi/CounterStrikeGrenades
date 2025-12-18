@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
@@ -346,11 +347,14 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         return result
     }
 
-    override fun getHitDamageSource(): DamageSource {
+    override fun getHitDamageSource(hitEntity: LivingEntity): DamageSource {
         val registryAccess = this.level().registryAccess()
-        return DamageSource(
-            registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.SMOKEGRENADE_HIT), this, this.owner
-        )
+        val damageTypeHolder = registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.SMOKEGRENADE_HIT)
+        return if (hitEntity == this.owner) {
+            DamageSource(damageTypeHolder, this)
+        } else {
+            DamageSource(damageTypeHolder, this, this.owner)
+        }
     }
 
     fun getSpreadBlocks(): List<BlockPos> {

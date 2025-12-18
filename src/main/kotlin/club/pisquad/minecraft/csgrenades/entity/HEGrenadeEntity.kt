@@ -60,7 +60,7 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
         val level = this.level() as ServerLevel
         val registryAccess = this.level().registryAccess()
         val damageRange = ModConfig.HEGrenade.DAMAGE_RANGE.get()
-        val damageSource = DamageSource(
+        val baseDamageSource = DamageSource(
             registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_EXPLOSION),
             this.owner
         )
@@ -70,6 +70,16 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
                 AABB(this.blockPosition()).inflate(ModConfig.HEGrenade.DAMAGE_RANGE.get())
             )
         for (entity in entities) {
+            val finalDamageSource = if (entity == this.owner) {
+                // For self-damage, use a source that bypasses team checks by not having an indirect entity.
+                DamageSource(
+                    registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_EXPLOSION),
+                    this
+                )
+            } else {
+                baseDamageSource
+            }
+
             val distance = entity.distanceTo(this).toDouble()
 
             if (distance < damageRange) {
@@ -78,7 +88,7 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
                     val originalKnockBackResistance =
                         entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue ?: 0.0
                     entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
-                    entity.hurt(damageSource, damage.toFloat())
+                    entity.hurt(finalDamageSource, damage.toFloat())
                     entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
                 }
             }
@@ -124,13 +134,14 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
         return max(headDamage, bodyDamage)
     }
 
-    override fun getHitDamageSource(): DamageSource {
+    override fun getHitDamageSource(hitEntity: LivingEntity): DamageSource {
         val registryAccess = this.level().registryAccess()
-        return DamageSource(
-            registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_HIT),
-            this,
-            this.owner
-        )
+        val damageTypeHolder = registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(ModDamageType.HEGRENADE_HIT)
+        return if (hitEntity == this.owner) {
+            DamageSource(damageTypeHolder, this)
+        } else {
+            DamageSource(damageTypeHolder, this, this.owner)
+        }
     }
 
     private fun blowUpNearbySmokeGrenade() {
