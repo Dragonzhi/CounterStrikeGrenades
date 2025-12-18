@@ -4,8 +4,8 @@
     
 
 
-| ![HE Grenade](src/main/resources/assets/csgrenades/textures/item/hegrenade.png) | ![Smoke Grenade](src/main/resources/assets/csgrenades/textures/item/smokegrenade.png) | ![Flash Bang](src/main/resources/assets/csgrenades/textures/item/flashbang.png) | ![Incendiary Grenade](src/main/resources/assets/csgrenades/textures/item/incendiary.png) | ![Molotov](src/main/resources/assets/csgrenades/textures/item/molotov.png) 
-|:--------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------|
+| ![HE Grenade](src/main/resources/assets/csgrenades/textures/item/hegrenade.png) | ![Smoke Grenade](src/main/resources/assets/csgrenades/textures/item/smokegrenade.png) | ![Flash Bang](src/main/resources/assets/csgrenades/textures/item/flashbang.png) | ![Incendiary Grenade](src/main/resources/assets/csgrenades/textures/item/incendiary.png) | ![Molotov](src/main/resources/assets/csgrenades/textures/item/molotov.png) | ![Decoy](src/main/resources/assets/csgrenades/textures/item/decoy.png)
+|:--------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------|:---------------------------------------------------------------------------|
 
 This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
 
@@ -21,10 +21,9 @@ This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
     - [x] Different varaints based on team
     - [x] Interaction with Smoke Grenades
 - [x] Smoke Grenade
-
+- [x] Decoy
 
 ## Todos
-- [ ] Decoy
 - [ ] 3D Models
 
 ## Recipes
@@ -78,7 +77,13 @@ damage_non_player_entity = true
 	#Range: 0 ~ 10000
 	regeneration_time = 3000
 	#Range: 0 ~ 100
-	smoke_max_falling_height = 30
+	smoke_max_falling_height = 8
+	#The radius of smoke cleared by a passing arrow, in blocks.
+	#Range: 0.1 ~ 10.0
+	arrow_clear_range = 1.2
+	#The radius of smoke cleared by a passing bullet (e.g. from Tacz), in blocks.
+	#Range: 0.1 ~ 10.0
+	bullet_clear_range = 1.0
 
 [HEGrenade]
 	#HE grenade's damage follow a linear decay function
