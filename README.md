@@ -44,10 +44,10 @@ To give yourself a decoy grenade that plays a creeper priming sound:
 If the `DecoySound` tag is not provided, the decoy will play mob sounds by default.
 
 ## Tacz Mod Integration (Optional)
-This mod provides an optional integration with the [Tacz gun mod](https://www.curseforge.com/minecraft/mc-mods/tacz) for enhanced decoy grenade functionality.
+This mod provides an optional integration with the [Tacz gun mod](https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero) for enhanced decoy grenade functionality.
 
 ### Dynamic Gun Sounds
-If the Tacz mod is installed, decoy grenades will prioritize playing realistic gun sounds from the Tacz mod instead of default vanilla sounds.
+If the Tacz mod is installed, decoy grenades will prioritize playing realistic gun sounds from the Tacz mod instead of default mob sounds.
 
 **How it works:**
 1.  When a decoy grenade lands and activates, it scans the throwing player's inventory *once*.
@@ -196,5 +196,5 @@ The mod currently supports the following languages:
   - [cloudnode-pro/modrinth-publish: A GitHub Action for publishing plugin versions to Modrinth](https://github.com/cloudnode-pro/modrinth-publish)
 
 ## Contributor
-- Programm: [@yurinekoai](https://github.com/yurinekoai)
+- Programm: [@yurinekoai](https://github.com/yurinekoai), [@Dragonzhi](https://github.com/Dragonzhi)
 - Assets: [@Dragonzhi](https://github.com/Dragonzhi)
