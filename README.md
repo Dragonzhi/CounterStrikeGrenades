@@ -22,6 +22,7 @@ This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
     - [x] Interaction with Smoke Grenades
 - [x] Smoke Grenade
 - [x] Decoy
+    - [x] Tacz Mod integration for realistic gun sounds
 
 ## Todos
 - [ ] 3D Models
@@ -41,6 +42,23 @@ To give yourself a decoy grenade that plays a creeper priming sound:
 /give @p csgrenades:decoy{DecoySound:"minecraft:entity.creeper.primed"} 1
 ```
 If the `DecoySound` tag is not provided, the decoy will play mob sounds by default.
+
+## Tacz Mod Integration (Optional)
+This mod provides an optional integration with the [Tacz gun mod](https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero) for enhanced decoy grenade functionality.
+
+### Dynamic Gun Sounds
+If the Tacz mod is installed, decoy grenades will prioritize playing realistic gun sounds from the Tacz mod instead of default mob sounds.
+
+**How it works:**
+1.  When a decoy grenade lands and activates, it scans the throwing player's inventory *once*.
+2.  It identifies the first Tacz gun (e.g., AK-47, M4A1) in the inventory.
+3.  For its entire duration, the decoy grenade will repeatedly play the "shoot" sound of that specific Tacz gun.
+
+**Priority:**
+The Tacz integration takes the highest priority for decoy sounds. If Tacz is installed, it will override any custom sounds set via NBT tags. If Tacz is not installed, the decoy will fall back to custom NBT sounds, or default vanilla sounds.
+
+### Decoy Explosion
+The final explosion of the decoy grenade has been adjusted to a very low-strength (0.1f) vanilla explosion. This removes the unrealistic knockback effect while still providing a visual and sound cue for the decoy's end-of-life.
 
 ## Config
 In version `1.2.*` or later, you can customize this mod's behavior via [Forge's server side config](https://docs.minecraftforge.net/en/1.20.1/misc/config/#registering-a-configuration).
@@ -178,5 +196,5 @@ The mod currently supports the following languages:
   - [cloudnode-pro/modrinth-publish: A GitHub Action for publishing plugin versions to Modrinth](https://github.com/cloudnode-pro/modrinth-publish)
 
 ## Contributor
-- Programm: [@yurinekoai](https://github.com/yurinekoai)
+- Programm: [@yurinekoai](https://github.com/yurinekoai), [@Dragonzhi](https://github.com/Dragonzhi)
 - Assets: [@Dragonzhi](https://github.com/Dragonzhi)

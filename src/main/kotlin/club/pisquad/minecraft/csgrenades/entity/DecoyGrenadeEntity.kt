@@ -1,8 +1,10 @@
 package club.pisquad.minecraft.csgrenades.entity
 
+import club.pisquad.minecraft.csgrenades.compat.tacz.TaczApiHandler
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.registery.ModDamageType
 import club.pisquad.minecraft.csgrenades.registery.ModItems
+import com.tacz.guns.api.item.IGun
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
@@ -14,9 +16,11 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.Level
+import net.minecraftforge.fml.ModList
 import kotlin.random.Random
 
 class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
@@ -25,14 +29,22 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     // --- State Variables ---
     private var activationTick: Int? = null
     private var nextSoundTick: Int = 0
+    private var lastSoundCounter = 0
 
     companion object {
         private const val TOTAL_DURATION_TICKS = 15 * 20
         private const val SOUND_INTERVAL_BASE_TICKS = 1 * 20
         private const val SOUND_INTERVAL_RANDOM_TICKS = 2 * 20
 
-        // Synched data for custom sound
         val CUSTOM_SOUND_ACCESSOR: EntityDataAccessor<String> = SynchedEntityData.defineId(
+            DecoyGrenadeEntity::class.java,
+            EntityDataSerializers.STRING
+        )
+        val SOUND_COUNTER_ACCESSOR: EntityDataAccessor<Int> = SynchedEntityData.defineId(
+            DecoyGrenadeEntity::class.java,
+            EntityDataSerializers.INT
+        )
+        val GUN_ID_TO_PLAY_ACCESSOR: EntityDataAccessor<String> = SynchedEntityData.defineId(
             DecoyGrenadeEntity::class.java,
             EntityDataSerializers.STRING
         )
@@ -40,7 +52,9 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
     override fun defineSynchedData() {
         super.defineSynchedData()
-        this.entityData.define(CUSTOM_SOUND_ACCESSOR, "") // Default to empty string
+        this.entityData.define(CUSTOM_SOUND_ACCESSOR, "")
+        this.entityData.define(SOUND_COUNTER_ACCESSOR, 0)
+        this.entityData.define(GUN_ID_TO_PLAY_ACCESSOR, "")
     }
 
     override fun getDefaultItem(): Item {
@@ -49,19 +63,45 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
     override fun tick() {
         super.tick()
-        if (level().isClientSide) return
 
+        if (level().isClientSide) {
+            val currentCounter = this.entityData.get(SOUND_COUNTER_ACCESSOR)
+            if (currentCounter > lastSoundCounter) {
+                if (ModList.get().isLoaded("tacz")) {
+                    val gunIdString = this.entityData.get(GUN_ID_TO_PLAY_ACCESSOR)
+                    if (gunIdString.isNotBlank()) {
+                        TaczApiHandler.playGunSound(this, ResourceLocation(gunIdString))
+                    }
+                }
+                lastSoundCounter = currentCounter
+            }
+            return
+        }
+
+        // Server-side logic
         if (activationTick == null) {
             // Check for landing and activation
             if (this.entityData.get(isLandedAccessor) && this.getDeltaMovement().lengthSqr() < 0.01) {
                 activationTick = this.tickCount
+                if (ModList.get().isLoaded("tacz")) {
+                    findAndSetTaczGunId()
+                }
                 scheduleNextSound()
             }
-        } else {
+        }
+        else {
             // Logic for when the decoy is active
             val currentActivationTick = tickCount - activationTick!!
             if (tickCount >= nextSoundTick) {
-                playSoundLogic()
+                if (ModList.get().isLoaded("tacz")) {
+                    val gunIdString = this.entityData.get(GUN_ID_TO_PLAY_ACCESSOR)
+                    if (gunIdString.isNotBlank()) {
+                        val currentCounter = this.entityData.get(SOUND_COUNTER_ACCESSOR)
+                        this.entityData.set(SOUND_COUNTER_ACCESSOR, currentCounter + 1)
+                    }
+                } else {
+                    playSoundLogic()
+                }
                 scheduleNextSound()
             }
             if (currentActivationTick > TOTAL_DURATION_TICKS) {
@@ -69,6 +109,21 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             }
         }
     }
+
+    private fun findAndSetTaczGunId() {
+        val owner = this.owner
+        if (owner is Player) {
+            for (itemStack in owner.inventory.items) {
+                val item = itemStack.item
+                if (item is IGun) {
+                    val gunId = item.getGunId(itemStack)
+                    this.entityData.set(GUN_ID_TO_PLAY_ACCESSOR, gunId.toString())
+                    return // Found a gun, exit
+                }
+            }
+        }
+    }
+
 
     override fun getHitDamageSource(hitEntity: LivingEntity): DamageSource {
         val registryAccess = this.level().registryAccess()
@@ -122,7 +177,7 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
     private fun endOfLifeExplosion() {
         if (!level().isClientSide) {
-            this.level().explode(this, this.x, this.y, this.z, 1.0f, false, Level.ExplosionInteraction.NONE)
+            this.level().explode(this, this.x, this.y, this.z, 0.1f, false, Level.ExplosionInteraction.NONE)
         }
         this.discard()
     }

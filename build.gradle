@@ -97,6 +97,9 @@ repositories {
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
         content { includeGroup "thedarkcolour" }
     }
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 dependencies {
@@ -106,6 +109,9 @@ dependencies {
     implementation "thedarkcolour:kotlinforforge:$kff_version"
 
     runtimeOnly "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.1"
+
+    // Tacz Mod soft dependency
+    compileOnly fg.deobf(files("libs/tacz-1.20.1-1.1.7.jar"))
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
