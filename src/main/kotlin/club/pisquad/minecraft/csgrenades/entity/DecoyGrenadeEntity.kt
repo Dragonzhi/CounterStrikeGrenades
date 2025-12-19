@@ -83,6 +83,9 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             // Check for landing and activation
             if (this.entityData.get(isLandedAccessor) && this.getDeltaMovement().lengthSqr() < 0.01) {
                 activationTick = this.tickCount
+                if (ModList.get().isLoaded("tacz")) {
+                    findAndSetTaczGunId()
+                }
                 scheduleNextSound()
             }
         } else {
@@ -90,7 +93,11 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             val currentActivationTick = tickCount - activationTick!!
             if (tickCount >= nextSoundTick) {
                 if (ModList.get().isLoaded("tacz")) {
-                    findAndTriggerTaczSound()
+                    val gunIdString = this.entityData.get(GUN_ID_TO_PLAY_ACCESSOR)
+                    if (gunIdString.isNotBlank()) {
+                        val currentCounter = this.entityData.get(SOUND_COUNTER_ACCESSOR)
+                        this.entityData.set(SOUND_COUNTER_ACCESSOR, currentCounter + 1)
+                    }
                 } else {
                     playSoundLogic()
                 }
@@ -101,7 +108,8 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             }
         }
     }
-     private fun findAndTriggerTaczSound() {
+
+    private fun findAndSetTaczGunId() {
         val owner = this.owner
         if (owner is Player) {
             for (itemStack in owner.inventory.items) {
@@ -109,8 +117,6 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 if (item is IGun) {
                     val gunId = item.getGunId(itemStack)
                     this.entityData.set(GUN_ID_TO_PLAY_ACCESSOR, gunId.toString())
-                    val currentCounter = this.entityData.get(SOUND_COUNTER_ACCESSOR)
-                    this.entityData.set(SOUND_COUNTER_ACCESSOR, currentCounter + 1)
                     return // Found a gun, exit
                 }
             }
