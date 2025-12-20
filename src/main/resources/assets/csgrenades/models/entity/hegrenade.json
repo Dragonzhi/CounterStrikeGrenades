@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "./granade",
-		"particle": "./granade"
+		"0": "csgrenades:entity/hegrenade",
+		"particle": "csgrenades:entity/hegrenade"
 	},
 	"elements": [
 		{

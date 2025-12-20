@@ -31,12 +31,20 @@ abstract class CounterStrikeGrenadeEntity(
     pLevel: Level,
     val grenadeType: GrenadeType
 ) :
-    ThrowableItemProjectile(pEntityType, pLevel) {
+    ThrowableItemProjectile(pEntityType, pLevel), GrenadeEntityInterface {
 
 
     var hitBlockSound = ModSoundEvents.GRENADE_HIT.get()
     var throwSound = ModSoundEvents.GRENADE_THROW.get()
     var lastHitEntity: UUID? = null
+
+    // For client side rotation
+    private var xRotSpeed: Float = 0f
+    private var yRotSpeed: Float = 0f
+    private var zRotSpeed: Float = 0f
+    var zRot: Float = 0f
+    var zRotO: Float = 0f
+
 
     companion object {
         val speedAccessor: EntityDataAccessor<Float> =
@@ -54,8 +62,18 @@ abstract class CounterStrikeGrenadeEntity(
         this.entityData.define(isExplodedAccessor, false)
     }
 
+    override fun shoot(x: Double, y: Double, z: Double, pVelocity: Float, pInaccuracy: Float) {
+        super.shoot(x, y, z, pVelocity, pInaccuracy)
+        if (level().isClientSide) {
+            randomizeRotation()
+        }
+    }
 
     override fun onHitEntity(result: EntityHitResult) {
+        if (level().isClientSide) {
+            randomizeRotation()
+        }
+
         if (result.entity is EndCrystal) {
             result.entity.hurt(result.entity.damageSources().generic(), 1f)
         }
@@ -85,6 +103,31 @@ abstract class CounterStrikeGrenadeEntity(
             this.deltaMovement = Vec3.ZERO
             this.isNoGravity = true
         }
+
+        // Client-side rotation logic
+        if (this.level().isClientSide) {
+            val isLanded = this.entityData.get(isLandedAccessor)
+            if (!isLanded && !this.entityData.get(isExplodedAccessor)) {
+                // In air: keep rotating
+                this.xRotO = this.xRot
+                this.yRotO = this.yRot
+                this.zRotO = this.zRot
+
+                this.xRot = (this.xRot + xRotSpeed) % 360
+                this.yRot = (this.yRot + yRotSpeed) % 360
+                this.zRot = (this.zRot + zRotSpeed) % 360
+
+                // Air resistance
+                this.xRotSpeed *= 0.99f
+                this.yRotSpeed *= 0.99f
+                this.zRotSpeed *= 0.99f
+            } else {
+                // On ground: stop rotation
+                this.xRotSpeed = 0f
+                this.yRotSpeed = 0f
+                this.zRotSpeed = 0f
+            }
+        }
     }
 
     /**
@@ -107,6 +150,10 @@ abstract class CounterStrikeGrenadeEntity(
      * @param result The block hit result.
      */
     override fun onHitBlock(result: BlockHitResult) {
+        if (level().isClientSide) {
+            randomizeRotation()
+        }
+
         if (ModConfig.IGNORE_BARRIER_BLOCK.get() && this.level()
                 .getBlockState(result.blockPos).block is BarrierBlock
         ) {
@@ -159,6 +206,12 @@ abstract class CounterStrikeGrenadeEntity(
             this.deltaMovement = Vec3.ZERO
             this.entityData.set(isLandedAccessor, true)
         }
+    }
+
+    private fun randomizeRotation() {
+        this.xRotSpeed = (random.nextFloat() - 0.5f) * 40
+        this.yRotSpeed = (random.nextFloat() - 0.5f) * 40
+        this.zRotSpeed = (random.nextFloat() - 0.5f) * 40
     }
 
     private fun bounce(direction: Direction, speedCoefficient: Float, frictionFactor: Float) {
