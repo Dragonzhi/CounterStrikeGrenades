@@ -1,10 +1,10 @@
-<p align="center"><img src="assets/banner.png" width="500" height="250"></p>
+<p align="center"><img src="assets/CounterStrikeGrenadesBanner.png" width="500" height="250"></p>
 
 <div align="center">
     
 
 
-| ![HE Grenade](src/main/resources/assets/csgrenades/textures/item/hegrenade.png) | ![Smoke Grenade](src/main/resources/assets/csgrenades/textures/item/smokegrenade.png) | ![Flash Bang](src/main/resources/assets/csgrenades/textures/item/flashbang.png) | ![Incendiary Grenade](src/main/resources/assets/csgrenades/textures/item/incendiary.png) | ![Molotov](src/main/resources/assets/csgrenades/textures/item/molotov.png) | ![Decoy](src/main/resources/assets/csgrenades/textures/item/decoy.png)
+| ![HE Grenade](assets/he.png) | ![Flash Bang](assets/flashbang.png) | ![Decoy](assets/decoy.png) | ![Incendiary Grenade](assets/incendiary.png) | ![Smoke Grenade](assets/smokegrenade.png) | ![Molotov](assets/molotov.png)
 |:--------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------|:---------------------------------------------------------------------------|
 
 This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
