@@ -3,10 +3,10 @@ package club.pisquad.minecraft.csgrenades
 import club.pisquad.minecraft.csgrenades.command.ModCommands
 import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
-import club.pisquad.minecraft.csgrenades.init.*
-import club.pisquad.minecraft.csgrenades.init.ModCreativeTabs
 import club.pisquad.minecraft.csgrenades.registery.*
+import net.minecraft.world.item.CreativeModeTabs
 import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -40,13 +40,37 @@ object CounterStrikeGrenades {
         ModItems.ITEMS.register(bus)
         ModSoundEvents.register(bus)
         ModParticles.PARTICLE_TYPES.register(bus)
-        ModCreativeTabs.TABS.register(bus)
+        ModCreativeTabs.CREATIVE_MODE_TABS.register(bus)
+        bus.addListener(::removeFromCreativeTabs)
+
         CsGrenadePacketHandler.registerMessage()
         MinecraftForge.EVENT_BUS.register(ModCommands)
         ModSerializers.register()
         net.minecraftforge.fml.ModLoadingContext.get()
             .registerConfig(net.minecraftforge.fml.config.ModConfig.Type.SERVER, ModConfig.SPEC)
 
+    }
+
+    private fun removeFromCreativeTabs(event: BuildCreativeModeTabContentsEvent) {
+        if (event.tabKey == CreativeModeTabs.COMBAT) {
+            val itemsToRemove = setOf(
+                ModItems.HEGRENADE_ITEM.get(),
+                ModItems.SMOKE_GRENADE_ITEM.get(),
+                ModItems.FLASH_BANG_ITEM.get(),
+                ModItems.DECOY_GRENADE_ITEM.get(),
+                ModItems.MOLOTOV_ITEM.get(),
+                ModItems.INCENDIARY_ITEM.get()
+            )
+
+            // Correct way: Use an iterator on the entry set to safely remove.
+            val iterator = event.getEntries().iterator()
+            while (iterator.hasNext()) {
+                val entry = iterator.next()
+                if (entry.key.item in itemsToRemove) {
+                    iterator.remove()
+                }
+            }
+        }
     }
 
     /**
