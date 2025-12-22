@@ -23,9 +23,7 @@ This mod provides utilities in CS2(with smoke falling mechanics) to Minecraft
 - [x] Smoke Grenade
 - [x] Decoy
     - [x] Tacz Mod integration for realistic gun sounds
-
-## Todos
-- [ ] 3D Models
+- [x] 3D Models
 
 ## Recipes
 <p align="center"><img src="assets/recipes.png" width="500" height="450"></p>
