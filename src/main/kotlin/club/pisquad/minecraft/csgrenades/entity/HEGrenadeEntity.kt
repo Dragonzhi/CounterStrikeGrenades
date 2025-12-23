@@ -24,7 +24,7 @@ import net.minecraft.world.phys.HitResult
 import kotlin.math.max
 
 class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
-    CounterStrikeGrenadeEntity(pEntityType, pLevel, GrenadeType.FLASH_BANG) {
+    CounterStrikeGrenadeEntity(pEntityType, pLevel, GrenadeType.HEGRENADE) {
 
     init {
         this.hitBlockSound = ModSoundEvents.HEGRENADE_BOUNCE.get()

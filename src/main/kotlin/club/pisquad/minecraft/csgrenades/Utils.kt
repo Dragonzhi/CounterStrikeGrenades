@@ -81,13 +81,12 @@ fun getRandomLocationFromBlockSurface(position: BlockPos): Vec3 {
 
 fun isPositionInSmoke(level: Level, pos: Vec3): Boolean {
     val blockPos = BlockPos.containing(pos)
-    val smokeRadius = ModConfig.SmokeGrenade.SMOKE_RADIUS.get()
-    val smokeFallingHeight = ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get()
     return level.getEntitiesOfClass(
         SmokeGrenadeEntity::class.java,
         AABB(BlockPos(pos.toVec3i())).inflate(
-            smokeRadius * 2.0, smokeFallingHeight + smokeRadius * 2.0,
-            smokeRadius * 2.0
+            ModConfig.SmokeGrenade.SMOKE_RADIUS.get() * 2.0,
+            ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get() + ModConfig.SmokeGrenade.SMOKE_RADIUS.get() * 2.0,
+            ModConfig.SmokeGrenade.SMOKE_RADIUS.get() * 2.0
         )
     ).any {
         it.getSpreadBlocks().any { block -> block == blockPos }
