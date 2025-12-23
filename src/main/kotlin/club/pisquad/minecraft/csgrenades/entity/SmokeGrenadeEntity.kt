@@ -42,6 +42,12 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     private var explosionTime: Instant? = null
     private val spreadBlocksCache: MutableList<@Serializable BlockPos> = mutableListOf()
 
+    // For freezing rotation after explosion
+    private var hasSavedFinalRotation = false
+    private var finalXRot = 0f
+    private var finalYRot = 0f
+    private var finalZRot = 0f
+
     override fun getDefaultItem(): Item {
         return ModItems.SMOKE_GRENADE_ITEM.get()
     }
@@ -114,7 +120,46 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     override fun tick() {
-        super.tick()
+        if (this.entityData.get(isExplodedAccessor)) {
+            // Forcefully freeze rotation and position
+            if (this.level().isClientSide) {
+                if (!hasSavedFinalRotation) {
+                    // Save the final rotation the first tick it's exploded
+                    finalXRot = this.xRot
+                    finalYRot = this.yRot
+                    finalZRot = this.zRot
+                    hasSavedFinalRotation = true
+                }
+                // On every subsequent tick, force the rotation back to the saved values
+                this.xRot = finalXRot
+                this.yRot = finalYRot
+                this.zRot = finalZRot
+                this.xRotO = finalXRot
+                this.yRotO = finalYRot
+                this.zRotO = finalZRot
+            }
+
+            // Smoke-specific logic still needs to run
+            if (this.level() is ServerLevel) {
+                if (this.explosionTime != null && Duration.between(
+                        this.explosionTime,
+                        Instant.now()
+                    ) > Duration.ofMillis(
+                        ModConfig.SmokeGrenade.SMOKE_LIFETIME.get().toLong()
+                    )
+                ) {
+                    this.kill()
+                }
+                extinguishNearbyFires()
+            }
+            if (this.level().isClientSide) {
+                this.disperseSmokeByProjectiles()
+            }
+            return // IMPORTANT: Do not execute any more tick logic (including super.tick())
+        }
+
+        super.tick() // Only run physics tick if not exploded
+
         if (this.entityData.get(isLandedAccessor)) {
             if (this.position() == Vec3(this.xOld, this.yOld, this.zOld)) {
                 this.tickCount++
@@ -133,23 +178,6 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 this.entityData.set(isExplodedAccessor, true)
                 this.explosionTime = Instant.now()
             }
-        }
-        if (this.level() is ServerLevel) {
-            if (this.entityData.get(isExplodedAccessor)) {
-                if (this.explosionTime != null && Duration.between(
-                        this.explosionTime,
-                        Instant.now()
-                    ) > Duration.ofMillis(
-                        ModConfig.SmokeGrenade.SMOKE_LIFETIME.get().toLong()
-                    )
-                ) {
-                    this.kill()
-                }
-                extinguishNearbyFires()
-            }
-        }
-        if (this.level().isClientSide && this.entityData.get(isExplodedAccessor)) {
-            this.disperseSmokeByProjectiles()
         }
     }
 

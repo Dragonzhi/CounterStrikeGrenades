@@ -48,6 +48,12 @@ abstract class AbstractFireGrenade(
     private var entitiesLastInRange: MutableMap<UUID, Long> = mutableMapOf()
     private var lastInWater: Boolean = false
 
+    // For freezing rotation after explosion
+    private var hasSavedFinalRotation = false
+    private var finalXRot = 0f
+    private var finalYRot = 0f
+    private var finalZRot = 0f
+
     init {
         hitBlockSound = ModSoundEvents.INCENDIARY_BOUNCE.get()
         throwSound = ModSoundEvents.INCENDIARY_THROW.get()
@@ -67,29 +73,42 @@ abstract class AbstractFireGrenade(
     }
 
     override fun tick() {
-        super.tick()
-        if (this.level().isClientSide) {
-            if (!this.poppedInAir && this.entityData.get(isExplodedAccessor)) {
-                FireGrenadeRenderer.renderOne(this)
+        val isExploded = this.entityData.get(isExplodedAccessor)
+
+        if (isExploded) {
+            // This grenade has exploded, stop physics and freeze rotation
+            if (this.level().isClientSide) {
+                if (!hasSavedFinalRotation) {
+                    finalXRot = this.xRot
+                    finalYRot = this.yRot
+                    finalZRot = this.zRot
+                    hasSavedFinalRotation = true
+                }
+                this.xRot = finalXRot
+                this.yRot = finalYRot
+                this.zRot = finalZRot
+                this.xRotO = finalXRot
+                this.yRotO = finalYRot
+                this.zRotO = finalZRot
             }
         } else {
-            if (this.entityData.get(isExplodedAccessor)) {
-                // [注释] 燃烧弹/瓶爆炸后，实体必须继续存在，以处理持续伤害(doDamage)并作为火焰粒子效果的锚点。
-                // 它会在其生命周期(LIFETIME)结束后，由下面的逻辑移除。
-                // 注意：这也导致了其实体模型会在火焰中心持续可见。所有常规的隐形方法(isInvisible, setItem)均尝试失败，
-                // 这意味着该实体可能使用了非常规的渲染管线？
-                // Damage players within range
-                this.doDamage()
+            // This grenade has not exploded, run full physics simulation
+            super.tick()
+        }
 
-                if ((this.tickCount - this.explosionTick) > ModConfig.FireGrenade.LIFETIME.get().millToTick()
-                ) {
+        // --- The following logic needs to run regardless of super.tick() ---
+        if (this.level().isClientSide) {
+            if (!this.poppedInAir && isExploded) {
+                FireGrenadeRenderer.renderOne(this)
+            }
+        } else { // Server-side
+            if (isExploded) {
+                this.doDamage()
+                if ((this.tickCount - this.explosionTick) > ModConfig.FireGrenade.LIFETIME.get().millToTick()) {
                     this.kill()
                     return
                 }
-            }
-            if (!this.entityData.get(isExplodedAccessor) && this.tickCount > ModConfig.FireGrenade.FUSE_TIME.get()
-                    .div(50)
-            ) {
+            } else if (this.tickCount > ModConfig.FireGrenade.FUSE_TIME.get().div(50)) {
                 this.entityData.set(isExplodedAccessor, true)
                 this.poppedInAir = true
                 CsGrenadePacketHandler.INSTANCE.send(
@@ -99,16 +118,19 @@ abstract class AbstractFireGrenade(
                 this.kill()
             }
         }
-        if (!this.lastInWater && this.deltaMovement.snapToAxis() == Direction.DOWN) {
-            val nextPosition = this.position().add(this.deltaMovement)
-            val nextBlockPos = BlockPos.containing(nextPosition)
-            val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
-            if (isNextBlockPosInWater) {
-                this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
-                this.deltaMovement = Vec3.ZERO
+
+        if (!isExploded) { // This logic should only run when the grenade is still moving
+            if (!this.lastInWater && this.deltaMovement.snapToAxis() == Direction.DOWN) {
+                val nextPosition = this.position().add(this.deltaMovement)
+                val nextBlockPos = BlockPos.containing(nextPosition)
+                val isNextBlockPosInWater = !this.level().getBlockState(nextBlockPos).fluidState.isEmpty
+                if (isNextBlockPosInWater) {
+                    this.onHitBlock(BlockHitResult(nextPosition, Direction.UP, nextBlockPos, false))
+                    this.deltaMovement = Vec3.ZERO
+                }
             }
+            this.lastInWater = this.isCurrentInWater()
         }
-        this.lastInWater = this.isCurrentInWater()
     }
 
     override fun onHitBlock(result: BlockHitResult) {

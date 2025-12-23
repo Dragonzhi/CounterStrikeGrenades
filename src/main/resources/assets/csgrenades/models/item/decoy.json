@@ -1,6 +1,129 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "csgrenades:item/decoy"
-  }
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "csgrenades:item/decoy_3d",
+		"particle": "csgrenades:item/decoy_3d"
+	},
+	"elements": [
+		{
+			"from": [7, 9, 7],
+			"to": [9, 11, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [15, 17, 15]},
+			"faces": {
+				"north": {"uv": [4.5, 2, 5.5, 3], "texture": "#0"},
+				"east": {"uv": [3.5, 7, 4.5, 8], "texture": "#0"},
+				"south": {"uv": [4.5, 7, 5.5, 8], "texture": "#0"},
+				"west": {"uv": [5.5, 7, 6.5, 8], "texture": "#0"},
+				"up": {"uv": [7.5, 8, 6.5, 7], "texture": "#0"},
+				"down": {"uv": [8.5, 1.5, 7.5, 2.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [7, 2, 7],
+			"to": [9, 8, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [14.5, 12, 14.5]},
+			"faces": {
+				"north": {"uv": [5.5, 4, 6.5, 7], "texture": "#0"},
+				"east": {"uv": [0, 6, 1, 9], "texture": "#0"},
+				"south": {"uv": [6.5, 4, 7.5, 7], "texture": "#0"},
+				"west": {"uv": [1, 7, 2, 10], "texture": "#0"},
+				"up": {"uv": [8.5, 3.5, 7.5, 2.5], "texture": "#0"},
+				"down": {"uv": [8.5, 3.5, 7.5, 4.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [3.5, 10, 6],
+			"to": [7.5, 10, 10],
+			"rotation": {"angle": 22.5, "axis": "z", "origin": [7.5, 10, 14.5]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 0], "texture": "#0"},
+				"east": {"uv": [0, 0, 2, 0], "texture": "#0"},
+				"south": {"uv": [0, 0, 2, 0], "texture": "#0"},
+				"west": {"uv": [0, 0, 2, 0], "texture": "#0"},
+				"up": {"uv": [3.5, 5, 1.5, 3], "texture": "#0"},
+				"down": {"uv": [5.5, 3, 3.5, 5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6.25, 8, 6.25],
+			"to": [9.75, 9, 9.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 7, 7]},
+			"faces": {
+				"north": {"uv": [7.5, 4.5, 9.5, 5], "texture": "#0"},
+				"east": {"uv": [7.5, 5, 9.5, 5.5], "texture": "#0"},
+				"south": {"uv": [7.5, 5.5, 9.5, 6], "texture": "#0"},
+				"west": {"uv": [7.5, 6, 9.5, 6.5], "texture": "#0"},
+				"up": {"uv": [6.5, 2, 4.5, 0], "texture": "#0"},
+				"down": {"uv": [3.5, 5, 1.5, 7], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6.25, 1, 6.25],
+			"to": [9.75, 2, 9.75],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 0, 7]},
+			"faces": {
+				"north": {"uv": [7.5, 6.5, 9.5, 7], "texture": "#0"},
+				"east": {"uv": [7.5, 7, 9.5, 7.5], "texture": "#0"},
+				"south": {"uv": [7.5, 7.5, 9.5, 8], "texture": "#0"},
+				"west": {"uv": [8, 0, 10, 0.5], "texture": "#0"},
+				"up": {"uv": [5.5, 7, 3.5, 5], "texture": "#0"},
+				"down": {"uv": [7.5, 2, 5.5, 4], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6.75, 2, 6.75],
+			"to": [9.25, 8, 9.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 4, 7]},
+			"faces": {
+				"north": {"uv": [0, 0, 1.5, 3], "texture": "#0"},
+				"east": {"uv": [1.5, 0, 3, 3], "texture": "#0"},
+				"south": {"uv": [0, 3, 1.5, 6], "texture": "#0"},
+				"west": {"uv": [3, 0, 4.5, 3], "texture": "#0"},
+				"up": {"uv": [8, 1.5, 6.5, 0], "texture": "#0"},
+				"down": {"uv": [3.5, 7, 2, 8.5], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [5, 90, 1.5],
+			"translation": [-1.5, 0.5, 2],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [5, 90, 1.5],
+			"translation": [-1.5, 0.5, 2],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"firstperson_righthand": {
+			"rotation": [-13, 82, 0],
+			"translation": [0, 3, 0.75],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-13, 82, 0],
+			"translation": [0, 3, 0.75],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"ground": {
+			"rotation": [90, 0, -180],
+			"scale": [0.8, 0.8, 0.8]
+		},
+		"gui": {
+			"rotation": [35, 40, 15],
+			"translation": [0, 3, 0],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"head": {
+			"rotation": [-180, 0, 0],
+			"translation": [0.25, 9.25, -0.25]
+		},
+		"fixed": {
+			"rotation": [0, -90, 0],
+			"translation": [0, 4, -2],
+			"scale": [2, 2, 2]
+		}
+	}
 }
