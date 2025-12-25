@@ -352,9 +352,42 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     private fun calculateSpreadBlocks(): List<BlockPos> {
+        // --- Smart Origin Sanitization ---
+        // Determines the actual starting point for smoke generation.
+        // If the grenade's block position is inside a solid block (e.g., stair crevice),
+        // it finds the adjacent air block the grenade is actually "poking" into.
+        var validatedOrigin = this.blockPosition()
+        val originalBlockState = this.level().getBlockState(validatedOrigin)
+        
+        if (!originalBlockState.getCollisionShape(this.level(), validatedOrigin).isEmpty) {
+            // Grenade is in a solid block. Try to find the "opening" using precise position.
+            val precisePos = this.position() // Precise float position of the entity
+            val blockCenter = Vec3.atCenterOf(validatedOrigin) // Center of the solid block
+
+            // Vector from block center to precise entity position. This points towards the "opening".
+            val escapeVector = precisePos.subtract(blockCenter)
+
+            // Find the dominant axis of this escape vector to determine the direction of the opening.
+            val bestDirection = Direction.getNearest(escapeVector.x, escapeVector.y, escapeVector.z)
+            
+            val potentialOrigin = validatedOrigin.relative(bestDirection, 1)
+            if (this.level().getBlockState(potentialOrigin).getCollisionShape(this.level(), potentialOrigin).isEmpty) {
+                validatedOrigin = potentialOrigin
+            } else {
+                // The "smart" direction is also blocked. Fallback: search for first empty neighbor.
+                val firstEmptyNeighbor = listOf(
+                    validatedOrigin.above(), validatedOrigin.below(),
+                    validatedOrigin.north(), validatedOrigin.south(),
+                    validatedOrigin.east(), validatedOrigin.west()
+                ).firstOrNull { pos -> this.level().getBlockState(pos).getCollisionShape(this.level(), pos).isEmpty }
+                
+                validatedOrigin = firstEmptyNeighbor ?: validatedOrigin.above(2) // As a last resort, go 2 blocks up.
+            }
+        }
+
         // 1. Calculate the initial "ideal" smoke cloud as before.
         val initialSmoke: Set<BlockPos> = SmokeGrenadeSpreadBlockCalculator(
-            5, 1500, 2, this.blockPosition()
+            5, 1500, 2, validatedOrigin // Use the sanitized origin
         ).calculate(this.level())
 
         if (initialSmoke.isEmpty()) return emptyList()
@@ -375,7 +408,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             var hitGround = false
             var currentPos = lowestBlock
             for (i in 0 until maxFallHeight) {
-                if (!this.level().getBlockState(currentPos.below()).canOcclude()) {
+                if (this.level().getBlockState(currentPos.below()).getCollisionShape(this.level(), currentPos.below()).isEmpty) {
                     fallDistance++
                     currentPos = currentPos.below()
                 } else {
@@ -407,7 +440,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         // Find max distance from center for normalization
         var maxDist = 0.0
         for (key in smokeColumns.keys) {
-            val dist = sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
+            val dist = kotlin.math.sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
             if (dist > maxDist) maxDist = dist
         }
         maxDist = maxDist.coerceAtLeast(1.0) // Avoid division by zero
@@ -415,7 +448,7 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         for ((key, columnBlocks) in smokeColumns) {
             val rawFallDistance = columnFallInfo[key] ?: 0
 
-            val distFromCenter = sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
+            val distFromCenter = kotlin.math.sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
 
             // Weight is high (1.0) at the center, and low (0.0) at the max distance.
             val weight = (1.0 - (distFromCenter / maxDist)).coerceIn(0.0, 1.0)
@@ -485,18 +518,17 @@ private class SmokeGrenadeSpreadBlockCalculator(
 
     private fun randomMoveOnce(level: Level, blockPos: BlockPos): BlockPos {
         val newLocation = when (randomDirection()) {
-            Direction.UP -> blockPos.below()
-            Direction.DOWN -> blockPos.above()
+            Direction.UP -> blockPos.above() // Corrected
+            Direction.DOWN -> blockPos.below() // Corrected
             Direction.NORTH -> blockPos.north()
             Direction.SOUTH -> blockPos.south()
             Direction.WEST -> blockPos.west()
             Direction.EAST -> blockPos.east()
         }
-        val blockState = level.getBlockState(newLocation)
-        if (!blockState.canOcclude() && !blockState.isCollisionShapeFullBlock(level, newLocation)) {
+        // Revert to getCollisionShape().isEmpty, as origin sanitization solves the leak.
+        if (level.getBlockState(newLocation).getCollisionShape(level, newLocation).isEmpty) {
             return newLocation
         }
-
         return blockPos
     }
 

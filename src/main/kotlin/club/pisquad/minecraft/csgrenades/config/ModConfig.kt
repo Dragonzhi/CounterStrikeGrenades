@@ -28,6 +28,7 @@ object ModConfig {
     }
 
     object HEGrenade {
+        var FUSE_TIME: ForgeConfigSpec.LongValue? = null
         lateinit var BASE_DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_RANGE: ForgeConfigSpec.DoubleValue
         lateinit var HEAD_DAMAGE_BOOST: ForgeConfigSpec.DoubleValue
@@ -43,6 +44,10 @@ object ModConfig {
         lateinit var DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_INCREASE_TIME: ForgeConfigSpec.LongValue
         lateinit var CAUSE_DAMAGE_TO_OWNER: ForgeConfigSpec.EnumValue<SelfDamageSetting>
+    }
+
+    object Flashbang {
+        lateinit var EFFECTIVE_RANGE: ForgeConfigSpec.DoubleValue
     }
 
     enum class SelfDamageSetting {
@@ -94,6 +99,8 @@ object ModConfig {
         HEGrenade.BASE_DAMAGE = builder.defineInRange("base_damage", 30.0, 0.0, 100.0)
         HEGrenade.DAMAGE_RANGE = builder.defineInRange("damage_range", 5.0, 0.0, 100.0)
         HEGrenade.HEAD_DAMAGE_BOOST = builder.defineInRange("head_damage_boost", 1.5, 0.0, 100.0)
+        builder.comment("Fuse time before explosion, in milliseconds")
+        HEGrenade.FUSE_TIME = builder.defineInRange("fuseTime", 2000L, 0L, 10000L)
         HEGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
         builder.pop()
 
@@ -109,6 +116,12 @@ object ModConfig {
         builder.comment("In what time should fire damage reach its maximum damage (linearly)")
         FireGrenade.DAMAGE_INCREASE_TIME = builder.defineInRange("damage_increase_time", 2000, 0, 100 * 1000.toLong())
         FireGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
+        builder.pop() // Correctly close FireGrenade section
+
+        builder.push("Flashbang")
+        builder.comment("The maximum distance at which the flashbang has a significant effect.")
+        Flashbang.EFFECTIVE_RANGE = builder.defineInRange("effectiveRange", 64.0, 1.0, 256.0)
+        builder.pop()
 
         SPEC = builder.build()
     }

@@ -45,7 +45,7 @@ class HEGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
         super.tick()
 
         // Explosion logic
-        if (getTimeFromTickCount(this.tickCount.toDouble()) > 2.5) { // isExploded is checked at the beginning
+        if (getTimeFromTickCount(this.tickCount.toDouble()) > (ModConfig.HEGrenade.FUSE_TIME?.get() ?: 2000) / 1000.0) { // isExploded is checked at the beginning
             if (!this.level().isClientSide) { // Server
                 this.doDamage()
             } else { // Client

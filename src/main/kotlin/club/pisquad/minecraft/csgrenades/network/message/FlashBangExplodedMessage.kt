@@ -4,6 +4,7 @@ import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.client.renderer.FlashbangBlindEffectRenderer
 import club.pisquad.minecraft.csgrenades.client.renderer.FlashbangParticleEffectRenderer
+import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.linearInterpolate
 import club.pisquad.minecraft.csgrenades.network.serializer.UUIDSerializer
 import club.pisquad.minecraft.csgrenades.network.serializer.Vec3Serializer
@@ -27,6 +28,7 @@ import java.util.function.Supplier
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 @Serializable
@@ -48,20 +50,20 @@ data class FlashbangEffectData(
 
             val fullyBlindedTime = max(
                 0.0, when (angle) {
-                    in 0.0..53.0 -> 1.88
-                    in 53.0..72.0 -> 0.45
-                    in 72.0..101.0 -> 0.08
-                    in 101.0..180.0 -> 0.08
+                    in 0.0..53.0 -> 2.5 // Increased from 1.88
+                    in 53.0..72.0 -> 0.6 // Increased from 0.45
+                    in 72.0..101.0 -> 0.1 // Increased from 0.08
+                    in 101.0..180.0 -> 0.02 // Changed from 0.0
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
 
             val totalEffectTime = max(
                 0.0, when (angle) {
-                    in 0.0..53.0 -> 4.0
-                    in 53.0..72.0 -> 3.0
-                    in 72.0..101.0 -> 1.5
-                    in 101.0..180.0 -> 0.5
+                    in 0.0..53.0 -> 5.0 // Increased from 4.0
+                    in 53.0..72.0 -> 3.75 // Increased from 3.0
+                    in 72.0..101.0 -> 2.0 // Increased from 1.5
+                    in 101.0..180.0 -> 0.25 // Decreased from 0.5
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
@@ -76,7 +78,10 @@ data class FlashbangEffectData(
         }
 
         private fun getDistanceFactor(distance: Double): Double {
-            return max(linearInterpolate(1.0, 0.0, (distance / 64.0)), 0.0)
+            val range = ModConfig.Flashbang.EFFECTIVE_RANGE.get()
+            val ratio = (distance / range).coerceIn(0.0, 1.0)
+            // Use a power curve (1 - ratio^2) to make the effect stronger at a distance.
+            return max(1.0 - ratio.pow(2.0), 0.0)
         }
 
         private fun getBlockingFactor(flashbangPos: Vec3, player: Player): Double {
