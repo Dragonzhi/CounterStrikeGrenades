@@ -225,6 +225,8 @@ abstract class AbstractFireGrenade(
                 .toMutableMap()
 
         val timeNow = Instant.now().toEpochMilli()
+        val fullDamage = ModConfig.FireGrenade.DAMAGE.get().toFloat()
+        val minDamage = fullDamage * 0.25f // Define minimum damage as 25% of full damage
 
         val damageTypeHolder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(getFireDamageType())
         val selfDamageTypeHolder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(getSelfFireDamageType())
@@ -249,27 +251,32 @@ abstract class AbstractFireGrenade(
                 return@forEach
             }
 
-            var damage = ModConfig.FireGrenade.DAMAGE.get().toFloat()
+            var damageToApply: Float // Renamed to avoid confusion with 'damage' in linearInterpolate
+
             if (entity.uuid in this.entitiesLastInRange.keys) {
-                damage = min(
-                    damage,
+                // Entity was already in range. Calculate ramp-up damage.
+                val startTime = this.entitiesLastInRange[entity.uuid]!!
+                damageToApply = min(
+                    fullDamage, // Ensure it doesn't exceed full damage
                     linearInterpolate(
-                        0.0, damage.toDouble(), (timeNow - this.entitiesLastInRange[entity.uuid]!!).div(
+                        minDamage.toDouble(), fullDamage.toDouble(), // Interpolate from minDamage to fullDamage
+                        (timeNow - startTime).div(
                             ModConfig.FireGrenade.DAMAGE_INCREASE_TIME.get().toDouble()
                         )
                     ).toFloat()
                 )
             } else {
-                damage = 0.1f
-                this.entitiesLastInRange[entity.uuid] = timeNow
+                // First time this entity is detected in range. Apply minDamage.
+                damageToApply = minDamage // Use the defined minDamage
+                this.entitiesLastInRange[entity.uuid] = timeNow // Register time of first contact
             }
 
             val originalKnockBackResistance =
                 entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue ?: 0.0
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = 1.0
 
-            entity.hurt(finalDamageSource, damage)
-            entity.invulnerableTime = 10
+            entity.hurt(finalDamageSource, damageToApply) // Apply the calculated damage
+            entity.invulnerableTime = 10 // Keep invulnerability at 10 ticks as per user's confirmation
 
             entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE)?.baseValue = originalKnockBackResistance
         }

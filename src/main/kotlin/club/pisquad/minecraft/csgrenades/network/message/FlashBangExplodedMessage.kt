@@ -4,6 +4,7 @@ import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.client.renderer.FlashbangBlindEffectRenderer
 import club.pisquad.minecraft.csgrenades.client.renderer.FlashbangParticleEffectRenderer
+import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.linearInterpolate
 import club.pisquad.minecraft.csgrenades.network.serializer.UUIDSerializer
 import club.pisquad.minecraft.csgrenades.network.serializer.Vec3Serializer
@@ -27,6 +28,7 @@ import java.util.function.Supplier
 import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 @Serializable
@@ -46,22 +48,39 @@ data class FlashbangEffectData(
             val distanceFactor = getDistanceFactor(distance)
             val blockingFactor = getBlockingFactor(flashbangPos, player)
 
+            // --- Duration calculation based on config ---
+            val maxDuration = ModConfig.Flashbang.MAX_DURATION.get()
+            val minDuration = ModConfig.Flashbang.MIN_DURATION.get()
+
+            // Calculate total effect times for each angle tier based on proportions of the max duration
+            val totalTimeTier0 = maxDuration // 0-53 deg
+            val totalTimeTier1 = maxDuration * 0.75 // 53-72 deg (Original: 3.0/4.0)
+            val totalTimeTier2 = maxDuration * 0.375 // 72-101 deg (Original: 1.5/4.0)
+            val totalTimeTier3 = minDuration // 101-180 deg
+
+            // Fully blinded time is a fraction of the total time, e.g., 50%
+            val fullBlindRatio = 0.5
+            val fullBlindTimeTier0 = totalTimeTier0 * fullBlindRatio
+            val fullBlindTimeTier1 = totalTimeTier1 * fullBlindRatio
+            val fullBlindTimeTier2 = totalTimeTier2 * fullBlindRatio
+            val fullBlindTimeTier3 = totalTimeTier3 * 0.1 // A small amount of full-blind time to ensure some effect
+
             val fullyBlindedTime = max(
                 0.0, when (angle) {
-                    in 0.0..53.0 -> 1.88
-                    in 53.0..72.0 -> 0.45
-                    in 72.0..101.0 -> 0.08
-                    in 101.0..180.0 -> 0.08
+                    in 0.0..53.0 -> fullBlindTimeTier0
+                    in 53.0..72.0 -> fullBlindTimeTier1
+                    in 72.0..101.0 -> fullBlindTimeTier2
+                    in 101.0..180.0 -> fullBlindTimeTier3
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
 
             val totalEffectTime = max(
                 0.0, when (angle) {
-                    in 0.0..53.0 -> 4.0
-                    in 53.0..72.0 -> 3.0
-                    in 72.0..101.0 -> 1.5
-                    in 101.0..180.0 -> 0.5
+                    in 0.0..53.0 -> totalTimeTier0
+                    in 53.0..72.0 -> totalTimeTier1
+                    in 72.0..101.0 -> totalTimeTier2
+                    in 101.0..180.0 -> totalTimeTier3
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
@@ -76,7 +95,10 @@ data class FlashbangEffectData(
         }
 
         private fun getDistanceFactor(distance: Double): Double {
-            return max(linearInterpolate(1.0, 0.0, (distance / 64.0)), 0.0)
+            val range = ModConfig.Flashbang.EFFECTIVE_RANGE.get()
+            val ratio = (distance / range).coerceIn(0.0, 1.0)
+            // Use a power curve to make the effect stronger at a distance.
+            return max(1.0 - ratio.pow(ModConfig.Flashbang.DISTANCE_DECAY_EXPONENT.get()), 0.0)
         }
 
         private fun getBlockingFactor(flashbangPos: Vec3, player: Player): Double {

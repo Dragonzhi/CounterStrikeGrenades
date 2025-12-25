@@ -28,6 +28,7 @@ object ModConfig {
     }
 
     object HEGrenade {
+        var FUSE_TIME: ForgeConfigSpec.LongValue? = null
         lateinit var BASE_DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_RANGE: ForgeConfigSpec.DoubleValue
         lateinit var HEAD_DAMAGE_BOOST: ForgeConfigSpec.DoubleValue
@@ -43,6 +44,14 @@ object ModConfig {
         lateinit var DAMAGE: ForgeConfigSpec.DoubleValue
         lateinit var DAMAGE_INCREASE_TIME: ForgeConfigSpec.LongValue
         lateinit var CAUSE_DAMAGE_TO_OWNER: ForgeConfigSpec.EnumValue<SelfDamageSetting>
+    }
+
+    object Flashbang {
+        lateinit var EFFECTIVE_RANGE: ForgeConfigSpec.DoubleValue
+        lateinit var FUSE_TIME: ForgeConfigSpec.LongValue
+        lateinit var MAX_DURATION: ForgeConfigSpec.DoubleValue
+        lateinit var MIN_DURATION: ForgeConfigSpec.DoubleValue
+        lateinit var DISTANCE_DECAY_EXPONENT: ForgeConfigSpec.DoubleValue
     }
 
     enum class SelfDamageSetting {
@@ -94,6 +103,8 @@ object ModConfig {
         HEGrenade.BASE_DAMAGE = builder.defineInRange("base_damage", 30.0, 0.0, 100.0)
         HEGrenade.DAMAGE_RANGE = builder.defineInRange("damage_range", 5.0, 0.0, 100.0)
         HEGrenade.HEAD_DAMAGE_BOOST = builder.defineInRange("head_damage_boost", 1.5, 0.0, 100.0)
+        builder.comment("Fuse time before explosion, in milliseconds")
+        HEGrenade.FUSE_TIME = builder.defineInRange("fuseTime", 2000L, 0L, 10000L)
         HEGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
         builder.pop()
 
@@ -109,6 +120,20 @@ object ModConfig {
         builder.comment("In what time should fire damage reach its maximum damage (linearly)")
         FireGrenade.DAMAGE_INCREASE_TIME = builder.defineInRange("damage_increase_time", 2000, 0, 100 * 1000.toLong())
         FireGrenade.CAUSE_DAMAGE_TO_OWNER = builder.defineEnum("causeDamageToOwner", SelfDamageSetting.ALWAYS, SelfDamageSetting.entries)
+        builder.pop() // Correctly close FireGrenade section
+
+        builder.push("Flashbang")
+        builder.comment("The maximum distance at which the flashbang has a significant effect.")
+        Flashbang.EFFECTIVE_RANGE = builder.defineInRange("effectiveRange", 64.0, 1.0, 256.0)
+        builder.comment("Fuse time from throw to detonation, in milliseconds.")
+        Flashbang.FUSE_TIME = builder.defineInRange("fuseTime", 1600L, 0L, 10000L)
+        builder.comment("Maximum total blindness duration (at point-blank, direct view), in seconds.")
+        Flashbang.MAX_DURATION = builder.defineInRange("maxDuration", 5.0, 0.0, 30.0)
+        builder.comment("Minimum total blindness duration (when fully facing away), in seconds.")
+        Flashbang.MIN_DURATION = builder.defineInRange("minDuration", 0.25, 0.0, 10.0)
+        builder.comment("Controls the curve of how the effect fades with distance. 1.0 is linear, >1.0 is steeper falloff at range (stronger close up).")
+        Flashbang.DISTANCE_DECAY_EXPONENT = builder.defineInRange("distanceDecayExponent", 2.0, 0.5, 5.0)
+        builder.pop()
 
         SPEC = builder.build()
     }

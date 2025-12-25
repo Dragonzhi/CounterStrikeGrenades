@@ -32,6 +32,9 @@ import net.minecraft.world.phys.Vec3
 import net.minecraftforge.fml.ModList
 import java.time.Duration
 import java.time.Instant
+import kotlin.math.pow
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
 import kotlin.random.Random
 
 class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) :
@@ -195,7 +198,9 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             searchBB
         ) { arrow -> arrow.deltaMovement.lengthSqr() > 0.01 } // Only consider moving arrows
 
-        val smokeCloudBoundingBox = AABB(BlockPos.containing(this.position())).inflate(ModConfig.SmokeGrenade.SMOKE_RADIUS.get().toDouble())
+        val smokeRadius = ModConfig.SmokeGrenade.SMOKE_RADIUS.get().toDouble()
+        val smokeFallingHeight = ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get().toDouble()
+        val smokeCloudBoundingBox = AABB(this.blockPosition()).inflate(smokeRadius).expandTowards(0.0, -smokeFallingHeight, 0.0)
 
         nearbyArrows.forEach { arrow ->
             // Use a "swept" bounding box to detect fast-moving entities that pass through the cloud in a single tick.
@@ -228,7 +233,8 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
 
             val smokeCenter = this.position()
             val smokeRadius = ModConfig.SmokeGrenade.SMOKE_RADIUS.get().toDouble()
-            val smokeCloudBoundingBox = AABB(BlockPos.containing(smokeCenter)).inflate(smokeRadius)
+            val smokeFallingHeight = ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get().toDouble()
+            val smokeCloudBoundingBox = AABB(BlockPos.containing(smokeCenter)).inflate(smokeRadius).expandTowards(0.0, -smokeFallingHeight, 0.0)
 
             allRenderEntities.forEach { entity ->
                 // Use a "swept" bounding box to detect fast-moving entities that pass through the cloud in a single tick.
@@ -346,33 +352,117 @@ class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
     }
 
     private fun calculateSpreadBlocks(): List<BlockPos> {
-        val initialSmoke = SmokeGrenadeSpreadBlockCalculator(
-            5, 1500, 2, this.blockPosition()
-        ).calculate(this.level())
-        val fallDownSmoke = mutableListOf<BlockPos>()
-        initialSmoke.forEach {
-            fallDownSmoke.addAll(
-                getSpaceBelow(it)
-            )
-        }
-        // Optimization: Use a Set to efficiently combine and find distinct blocks.
-        return initialSmoke.union(fallDownSmoke).toList()
-    }
+        // --- Smart Origin Sanitization ---
+        // Determines the actual starting point for smoke generation.
+        // If the grenade's block position is inside a solid block (e.g., stair crevice),
+        // it finds the adjacent air block the grenade is actually "poking" into.
+        var validatedOrigin = this.blockPosition()
+        val originalBlockState = this.level().getBlockState(validatedOrigin)
+        
+        if (!originalBlockState.getCollisionShape(this.level(), validatedOrigin).isEmpty) {
+            // Grenade is in a solid block. Try to find the "opening" using precise position.
+            val precisePos = this.position() // Precise float position of the entity
+            val blockCenter = Vec3.atCenterOf(validatedOrigin) // Center of the solid block
 
-    private fun getSpaceBelow(position: BlockPos): List<BlockPos> {
-        // Temporarily set the maximum fall down height to 10
-        val result = mutableListOf<BlockPos>()
-        var currentPos = position
-        repeat(ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get()) {
-            if (!this.level().getBlockState(currentPos.below()).canOcclude()
-            ) {
-                result.add(currentPos)
-                currentPos = currentPos.below()
+            // Vector from block center to precise entity position. This points towards the "opening".
+            val escapeVector = precisePos.subtract(blockCenter)
+
+            // Find the dominant axis of this escape vector to determine the direction of the opening.
+            val bestDirection = Direction.getNearest(escapeVector.x, escapeVector.y, escapeVector.z)
+            
+            val potentialOrigin = validatedOrigin.relative(bestDirection, 1)
+            if (this.level().getBlockState(potentialOrigin).getCollisionShape(this.level(), potentialOrigin).isEmpty) {
+                validatedOrigin = potentialOrigin
             } else {
-                return result
+                // The "smart" direction is also blocked. Fallback: search for first empty neighbor.
+                val firstEmptyNeighbor = listOf(
+                    validatedOrigin.above(), validatedOrigin.below(),
+                    validatedOrigin.north(), validatedOrigin.south(),
+                    validatedOrigin.east(), validatedOrigin.west()
+                ).firstOrNull { pos -> this.level().getBlockState(pos).getCollisionShape(this.level(), pos).isEmpty }
+                
+                validatedOrigin = firstEmptyNeighbor ?: validatedOrigin.above(2) // As a last resort, go 2 blocks up.
             }
         }
-        return result
+
+        // 1. Calculate the initial "ideal" smoke cloud as before.
+        val initialSmoke: Set<BlockPos> = SmokeGrenadeSpreadBlockCalculator(
+            5, 1500, 2, validatedOrigin // Use the sanitized origin
+        ).calculate(this.level())
+
+        if (initialSmoke.isEmpty()) return emptyList()
+
+        val maxFallHeight = ModConfig.SmokeGrenade.SMOKE_MAX_FALLING_HEIGHT.get()
+        val smokeColumns = initialSmoke.groupBy { Pair(it.x, it.z) }
+        val totalColumnCount = smokeColumns.size.coerceAtLeast(1) // Avoid division by zero
+
+        // --- Calculation Pass: Determine raw fall distance and support for each column ---
+        val columnFallInfo = mutableMapOf<Pair<Int, Int>, Int>() // Stores raw fall distance
+        var landingColumnCount = 0
+
+        for ((key, columnBlocks) in smokeColumns) {
+            if (columnBlocks.isEmpty()) continue
+            val lowestBlock = columnBlocks.minByOrNull { it.y } ?: continue
+
+            var fallDistance = 0
+            var hitGround = false
+            var currentPos = lowestBlock
+            for (i in 0 until maxFallHeight) {
+                if (this.level().getBlockState(currentPos.below()).getCollisionShape(this.level(), currentPos.below()).isEmpty) {
+                    fallDistance++
+                    currentPos = currentPos.below()
+                } else {
+                    hitGround = true
+                    break
+                }
+            }
+            columnFallInfo[key] = fallDistance
+            if (hitGround) {
+                landingColumnCount++
+            }
+        }
+
+        // --- Decision Pass: Decide between spherical and slumping shape ---
+        val supportThreshold = 0.3 // 30%
+        val landingPercentage = landingColumnCount.toDouble() / totalColumnCount
+
+        if (landingPercentage < supportThreshold) {
+            // Not enough support. Stay spherical.
+            return initialSmoke.toList()
+        }
+
+        // --- Smoothing and Application Pass: Apply center-weighted slumping ---
+        val finalSmoke = mutableSetOf<BlockPos>()
+        val grenadePos = this.blockPosition()
+        val centerKey = Pair(grenadePos.x, grenadePos.z)
+        val centerFallDistance = columnFallInfo[centerKey] ?: 0 // Raw fall distance of the center
+
+        // Find max distance from center for normalization
+        var maxDist = 0.0
+        for (key in smokeColumns.keys) {
+            val dist = kotlin.math.sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
+            if (dist > maxDist) maxDist = dist
+        }
+        maxDist = maxDist.coerceAtLeast(1.0) // Avoid division by zero
+
+        for ((key, columnBlocks) in smokeColumns) {
+            val rawFallDistance = columnFallInfo[key] ?: 0
+
+            val distFromCenter = kotlin.math.sqrt((key.first - centerKey.first).toDouble().pow(2.0) + (key.second - centerKey.second).toDouble().pow(2.0))
+
+            // Weight is high (1.0) at the center, and low (0.0) at the max distance.
+            val weight = (1.0 - (distFromCenter / maxDist)).coerceIn(0.0, 1.0)
+
+            // The final fall distance is interpolated between the column's raw distance and the center's distance.
+            // A higher weight means it adheres more to the center's fall behavior.
+            val finalFallDistance = (rawFallDistance * (1.0 - weight) + centerFallDistance * weight).roundToInt()
+
+            columnBlocks.forEach { block ->
+                finalSmoke.add(block.below(finalFallDistance))
+            }
+        }
+
+        return finalSmoke.toList()
     }
 
     override fun getHitDamageSource(hitEntity: LivingEntity): DamageSource {
@@ -428,18 +518,17 @@ private class SmokeGrenadeSpreadBlockCalculator(
 
     private fun randomMoveOnce(level: Level, blockPos: BlockPos): BlockPos {
         val newLocation = when (randomDirection()) {
-            Direction.UP -> blockPos.below()
-            Direction.DOWN -> blockPos.above()
+            Direction.UP -> blockPos.above() // Corrected
+            Direction.DOWN -> blockPos.below() // Corrected
             Direction.NORTH -> blockPos.north()
             Direction.SOUTH -> blockPos.south()
             Direction.WEST -> blockPos.west()
             Direction.EAST -> blockPos.east()
         }
-        val blockState = level.getBlockState(newLocation)
-        if (!blockState.canOcclude() && !blockState.isCollisionShapeFullBlock(level, newLocation)) {
+        // Revert to getCollisionShape().isEmpty, as origin sanitization solves the leak.
+        if (level.getBlockState(newLocation).getCollisionShape(level, newLocation).isEmpty) {
             return newLocation
         }
-
         return blockPos
     }
 

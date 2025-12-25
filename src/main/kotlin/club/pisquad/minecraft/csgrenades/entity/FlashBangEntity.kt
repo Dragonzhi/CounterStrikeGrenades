@@ -1,5 +1,6 @@
 package club.pisquad.minecraft.csgrenades.entity
 
+import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.network.CsGrenadePacketHandler
 import club.pisquad.minecraft.csgrenades.network.message.AffectedPlayerInfo
@@ -27,7 +28,7 @@ class FlashBangEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLev
     override fun tick() {
         super.tick()
 
-        if (this.tickCount > 1.6 * 20 && !this.entityData.get(isExplodedAccessor)) {
+        if (this.tickCount > ModConfig.Flashbang.FUSE_TIME.get() / 50.0 && !this.entityData.get(isExplodedAccessor)) {
             if (!this.level().isClientSide) {
                 CsGrenadePacketHandler.INSTANCE.send(
                     PacketDistributor.ALL.noArg(),
