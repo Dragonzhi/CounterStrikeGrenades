@@ -68,7 +68,7 @@ Below is the default one
 #Configs for Counter Strike Grenade
 #Configs are separated into different scopes based on the type of grenade
 #Should grenade entities fly through barrier block?
-ignore_barrier_block = false
+ignore_barrier_block = true
 #Throw cooldown, in milliseconds
 #Range: 0 ~ 60000
 grenade_throw_cooldown = 1000
@@ -122,8 +122,11 @@ damage_non_player_entity = true
 	damage_range = 5.0
 	#Range: 0.0 ~ 100.0
 	head_damage_boost = 1.5
-	#Allowed values: NEVER, NOT_IN_TEAM, ALWAYS
+	#Allowed Values: NEVER, NOT_IN_TEAM, ALWAYS
 	causeDamageToOwner = "ALWAYS"
+	#Fuse time before explosion, in milliseconds
+	#Range: 0 ~ 10000
+	fuseTime = 2000
 
 [FireGrenade]
 	#Range: 0 ~ 100
@@ -143,8 +146,25 @@ damage_non_player_entity = true
 	#In what time should fire damage reach its maximum damage (linearly)
 	#Range: 0 ~ 100000
 	damage_increase_time = 2000
-	#Allowed values: NEVER, NOT_IN_TEAM, ALWAYS
+	#Allowed Values: NEVER, NOT_IN_TEAM, ALWAYS
 	causeDamageToOwner = "ALWAYS"
+
+[Flashbang]
+	#The maximum distance at which the flashbang has a significant effect.
+	#Range: 1.0 ~ 256.0
+	effectiveRange = 64.0
+	#Fuse time from throw to detonation, in milliseconds.
+	#Range: 0 ~ 10000
+	fuseTime = 1600
+	#Maximum total blindness duration (at point-blank, direct view), in seconds.
+	#Range: 0.0 ~ 30.0
+	maxDuration = 5.0
+	#Minimum total blindness duration (when fully facing away), in seconds.
+	#Range: 0.0 ~ 10.0
+	minDuration = 0.25
+	#Controls the curve of how the effect fades with distance. 1.0 is linear, >1.0 is steeper falloff at range (stronger close up).
+	#Range: 0.5 ~ 5.0
+	distanceDecayExponent = 2.0
 ```
 
 ## Commands
