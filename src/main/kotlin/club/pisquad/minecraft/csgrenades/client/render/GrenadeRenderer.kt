@@ -15,6 +15,9 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.ItemDisplayContext
+import net.minecraft.client.Minecraft // Import Minecraft
+import net.minecraft.client.resources.model.BakedModel // Import BakedModel
+import net.minecraft.client.resources.model.ModelManager // Import ModelManager
 
 class GrenadeRenderer<T>(
     context: EntityRendererProvider.Context
@@ -56,17 +59,40 @@ class GrenadeRenderer<T>(
             // 修正模型大小
             poseStack.scale(0.5f, 0.5f, 0.5f)
 
-            // 使用 ItemRenderer 来绘制物品的3D模型
-            itemRenderer.renderStatic(
-                itemStack,
-                ItemDisplayContext.FIXED, // 使用一个中性的显示模式，避免覆盖我们的旋转
-                packedLight,
-                OverlayTexture.NO_OVERLAY,
-                poseStack,
-                buffer,
-                entity.level(),
-                entity.id
-            )
+            // --- START MODIFICATION ---
+            val itemName = itemStack.item.descriptionId.replaceFirst("item.csgrenades.", "")
+            // Model path for items is usually "models/item/[item_name].json"
+            // So for a thrown item, it would be "models/item/[item_name]_t.json"
+            val thrownModelLocation = ResourceLocation("csgrenades", "item/${itemName}_t")
+
+            val modelManager = Minecraft.getInstance().itemRenderer.itemModelShaper.modelManager
+            val bakedModel: BakedModel? = modelManager.getModel(thrownModelLocation)
+
+            if (bakedModel != null && bakedModel != modelManager.missingModel && !bakedModel.isCustomRenderer) {
+                itemRenderer.render(
+                    itemStack,
+                    ItemDisplayContext.FIXED,
+                    false, // left-handed. Doesn't matter much for grenades unless there's specific rendering logic based on this
+                    poseStack,
+                    buffer,
+                    packedLight,
+                    OverlayTexture.NO_OVERLAY,
+                    bakedModel
+                )
+            } else {
+                // Fallback to original rendering if custom model not found or is a custom renderer
+                itemRenderer.renderStatic(
+                    itemStack,
+                    ItemDisplayContext.FIXED,
+                    packedLight,
+                    OverlayTexture.NO_OVERLAY,
+                    poseStack,
+                    buffer,
+                    entity.level(),
+                    entity.id
+                )
+            }
+            // --- END MODIFICATION ---
         }
 
         poseStack.popPose()
