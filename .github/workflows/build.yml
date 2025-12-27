@@ -15,7 +15,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # 升级到 v4
-
+        with:
+          fetch-depth: 0  # 拉取所有历史记录和所有标签
+      
       - name: Set up Java 17
         uses: actions/setup-java@v4 # 升级到 v4
         with:
