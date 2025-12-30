@@ -1,5 +1,6 @@
 package club.pisquad.minecraft.csgrenades.network.message
 
+import club.pisquad.minecraft.csgrenades.api.CSGrenadesAPI // New import
 import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.client.renderer.FlashbangBlindEffectRenderer
@@ -84,6 +85,14 @@ data class FlashbangEffectData(
                     else -> 0.0
                 } * distanceFactor * blockingFactor
             )
+
+            // NEW: Set player flashed status using the API
+            if (!level.isClientSide) { // Ensure this is only called on the server
+                val totalEffectTimeInTicks = (totalEffectTime * 20).toInt()
+                if (totalEffectTimeInTicks > 0) {
+                    CSGrenadesAPI.setPlayerFlashed(player, totalEffectTimeInTicks)
+                }
+            }
 
             return FlashbangEffectData(
                 position = flashbangPos,

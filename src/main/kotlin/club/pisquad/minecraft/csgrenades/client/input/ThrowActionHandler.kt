@@ -21,6 +21,8 @@ import org.lwjgl.glfw.GLFW
 import java.time.Duration
 import java.time.Instant
 import kotlin.math.min
+import net.minecraftforge.common.MinecraftForge // Moved from below
+import club.pisquad.minecraft.csgrenades.event.GrenadeThrowEvent // Moved from below
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = CounterStrikeGrenades.ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
@@ -198,6 +200,15 @@ object ThrowActionHandler {
 
 fun throwAction(throwSpeed: Double, grenadeType: GrenadeType) {
     val player: Player = Minecraft.getInstance().player ?: return
+    val itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND) // Moved up for event
+
+    // NEW: Fire the GrenadeThrowEvent
+    val event = GrenadeThrowEvent(player, itemInHand)
+    if (MinecraftForge.EVENT_BUS.post(event)) {
+        // Event was canceled, stop the throw action
+        return
+    }
+
     val speedFactor =
         (throwSpeed - ModConfig.THROW_SPEED_WEAK.get()) / (ModConfig.THROW_SPEED_STRONG.get() - ModConfig.THROW_SPEED_WEAK.get())
     val playerSpeedFactor =
