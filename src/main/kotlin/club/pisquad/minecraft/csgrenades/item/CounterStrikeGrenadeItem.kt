@@ -1,8 +1,7 @@
 package club.pisquad.minecraft.csgrenades.item
 
-import club.pisquad.minecraft.csgrenades.config.ModConfig
-import club.pisquad.minecraft.csgrenades.enums.GrenadeType
-import com.google.common.collect.HashMultimap
+import club.pisquad.minecraft.csgrenades.enums.*
+import com.google.common.collect.ImmutableMultimap
 import com.google.common.collect.Multimap
 import net.minecraft.core.BlockPos
 import net.minecraft.sounds.SoundEvent
@@ -24,22 +23,29 @@ private var drawSoundPlayedSlot: Int = -1
 open class CounterStrikeGrenadeItem(properties: Properties) : Item(properties.stacksTo(1)) {
 
     lateinit var grenadeType: GrenadeType
+    val defaultModifiers: ImmutableMultimap<Attribute, AttributeModifier>
+
+    init {
+        val builder = ImmutableMultimap.builder<Attribute, AttributeModifier>()
+        builder.put(Attributes.ATTACK_SPEED, AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 1000.0, AttributeModifier.Operation.ADDITION))
+        this.defaultModifiers = builder.build()
+    }
 
     // Sounds
     var drawSound: SoundEvent = SoundEvents.EMPTY
 
     override fun getAttributeModifiers(
-        slot: EquipmentSlot?,
-        stack: ItemStack?,
-    ): Multimap<Attribute, AttributeModifier> {
-        val modifiers = HashMultimap.create(super.getAttributeModifiers(slot, stack))
-        return modifiers
+        slot: EquipmentSlot,
+        stack: ItemStack,
+    ): Multimap<Attribute, AttributeModifier> = if (slot == EquipmentSlot.MAINHAND) {
+        this.defaultModifiers
+    } else {
+        super.getDefaultAttributeModifiers(slot)
     }
 
     override fun inventoryTick(stack: ItemStack, level: Level, entity: Entity, slotId: Int, isSelected: Boolean) {
         if (!level.isClientSide) return
         if (entity !is Player) return
-
         if (isSelected && drawSoundPlayedSlot != slotId) {
             entity.playSound(drawSound, 0.2f, 1.0f)
             drawSoundPlayedSlot = slotId
