@@ -7,6 +7,7 @@ import club.pisquad.minecraft.csgrenades.network.message.GrenadeThrownMessage
 import net.minecraft.resources.ResourceLocation
 import net.minecraftforge.network.NetworkDirection
 import net.minecraftforge.network.NetworkRegistry
+import net.minecraftforge.network.simple.IndexedMessageCodec.MessageHandler
 import net.minecraftforge.network.simple.SimpleChannel
 import java.util.*
 

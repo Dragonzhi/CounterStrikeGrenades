@@ -5,10 +5,10 @@ import club.pisquad.minecraft.csgrenades.client.renderer.SmokeRenderManager
 import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.particle.SmokeGrenadeParticle
-import club.pisquad.minecraft.csgrenades.registery.ModDamageType
-import club.pisquad.minecraft.csgrenades.registery.ModItems
-import club.pisquad.minecraft.csgrenades.registery.ModSerializers
-import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
+import club.pisquad.minecraft.csgrenades.registry.ModDamageType
+import club.pisquad.minecraft.csgrenades.registry.ModItems
+import club.pisquad.minecraft.csgrenades.registry.ModSerializers
+import club.pisquad.minecraft.csgrenades.registry.ModSoundEvents
 import kotlinx.serialization.Serializable
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance
@@ -34,7 +34,6 @@ import java.time.Duration
 import java.time.Instant
 import kotlin.math.pow
 import kotlin.math.roundToInt
-import kotlin.math.sqrt
 import kotlin.random.Random
 
 class SmokeGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, pLevel: Level) : CounterStrikeGrenadeEntity(pEntityType, pLevel, GrenadeType.FLASH_BANG) {

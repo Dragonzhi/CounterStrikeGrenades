@@ -5,9 +5,9 @@ import club.pisquad.minecraft.csgrenades.client.renderer.HEGrenadeRenderManager
 import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.enums.GrenadeType
 import club.pisquad.minecraft.csgrenades.getTimeFromTickCount
-import club.pisquad.minecraft.csgrenades.registery.ModDamageType
-import club.pisquad.minecraft.csgrenades.registery.ModItems
-import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
+import club.pisquad.minecraft.csgrenades.registry.ModDamageType
+import club.pisquad.minecraft.csgrenades.registry.ModItems
+import club.pisquad.minecraft.csgrenades.registry.ModSoundEvents
 import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.damagesource.DamageSource

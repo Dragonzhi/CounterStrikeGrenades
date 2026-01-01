@@ -1,4 +1,4 @@
-package club.pisquad.minecraft.csgrenades.registery
+package club.pisquad.minecraft.csgrenades.registry
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import net.minecraft.core.particles.ParticleType

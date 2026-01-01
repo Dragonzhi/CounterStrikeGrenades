@@ -1,9 +1,8 @@
-package club.pisquad.minecraft.csgrenades.registery
+package club.pisquad.minecraft.csgrenades.registry
 
 import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.client.render.GrenadeRenderer
 import net.minecraft.client.renderer.entity.EntityRenderers
-import net.minecraft.client.renderer.entity.ThrownItemRenderer
 import net.minecraftforge.client.event.EntityRenderersEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod

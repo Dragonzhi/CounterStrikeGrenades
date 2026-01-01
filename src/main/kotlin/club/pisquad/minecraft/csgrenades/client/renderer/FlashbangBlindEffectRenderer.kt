@@ -4,7 +4,7 @@ import club.pisquad.minecraft.csgrenades.CounterStrikeGrenades
 import club.pisquad.minecraft.csgrenades.SoundTypes
 import club.pisquad.minecraft.csgrenades.SoundUtils
 import club.pisquad.minecraft.csgrenades.network.message.FlashbangEffectData
-import club.pisquad.minecraft.csgrenades.registery.ModSoundEvents
+import club.pisquad.minecraft.csgrenades.registry.ModSoundEvents
 import club.pisquad.minecraft.csgrenades.sound.FlashbangRingSound
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics

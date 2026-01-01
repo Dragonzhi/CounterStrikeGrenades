@@ -5,7 +5,7 @@ import club.pisquad.minecraft.csgrenades.config.ModConfig
 import club.pisquad.minecraft.csgrenades.entity.SmokeGrenadeEntity
 import club.pisquad.minecraft.csgrenades.millToTick
 import club.pisquad.minecraft.csgrenades.particle.SmokeGrenadeParticle
-import club.pisquad.minecraft.csgrenades.registery.ModParticles
+import club.pisquad.minecraft.csgrenades.registry.ModParticles
 import club.pisquad.minecraft.csgrenades.toVec3
 import club.pisquad.minecraft.csgrenades.toVec3i
 import net.minecraft.client.particle.ParticleEngine
