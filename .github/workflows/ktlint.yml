@@ -1,25 +1,27 @@
-name: ktlint Check
+name: ktlint
 
 on:
   pull_request:
     paths:
-      - '**/*.kt'
-      - '**/*.kts'
+      - .github/workflows/ktlint.yml
+      - 'src/**/*.kt'
+      - '**.kts'
 
 jobs:
   ktlint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
-      - name: Run ktlint
-        uses: ScaCap/action-ktlint@master
+      - run: |
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.7.1/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+      - name: run ktlint
+        run: |
+          ktlint --reporter=checkstyle,output=build/ktlint-report.xml
+        continue-on-error: true
+      - uses: yutailang0119/action-ktlint@v4
         with:
-          github_token: ${{ secrets.KTLINT_TOKEN }}
-          reporter: github-pr-check  # Or 'github-pr-review' for comments
-          fail_level: error         # Fails the job on lint errors (default behavior with reviewdog)
-          # Optional: ktlint_version: 1.3.1 (use latest if omitted)
-          # Optional: android: true (for Android style guide)
+          report-path: build/*.xml # Support glob patterns by https://www.npmjs.com/package/@actions/glob
+          ignore-warnings: true # Ignore Lint Warnings
+        continue-on-error: false # If annotations contain error of severity, action-ktlint exit 1.
