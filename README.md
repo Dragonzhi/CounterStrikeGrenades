@@ -66,6 +66,49 @@ The Tacz integration takes the highest priority for decoy sounds. If Tacz is ins
 ### Decoy Explosion
 The final explosion of the decoy grenade has been adjusted to a very low-strength (0.1f) vanilla explosion. This removes the unrealistic knockback effect while still providing a visual and sound cue for the decoy's end-of-life.
 
+## API for Developers
+This mod provides an API for other developers to integrate with.
+
+### Checking if a Player is Flashed
+You can check if a player is currently under the effect of a flashbang using the `CSGrenadesAPI`.
+
+**Usage (Java):**
+```java
+import club.pisquad.minecraft.csgrenades.api.CSGrenadesAPI;
+import net.minecraft.world.entity.player.Player;
+
+// Assuming you have a player object, e.g., 'targetPlayer'
+boolean isFlashed = CSGrenadesAPI.isPlayerFlashed(targetPlayer);
+
+if (isFlashed) {
+    // Player is currently flashed
+} else {
+    // Player is not flashed
+}
+```
+
+### Canceling a Grenade Throw
+You can listen for the `GrenadeThrowEvent` and cancel it to prevent a grenade from being thrown. This event is fired on the Forge event bus.
+
+**Usage (Java):**
+```java
+import club.pisquad.minecraft.csgrenades.event.GrenadeThrowEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+public class MyEventHandler {
+    @SubscribeEvent
+    public void onGrenadeThrow(GrenadeThrowEvent event) {
+        // Example: Prevent players from throwing grenades while sneaking
+        if (event.getPlayer().isShiftKeyDown()) {
+            event.setCanceled(true); // This will stop the grenade from being thrown
+        }
+    }
+}
+
+// Remember to register your event handler class on the Forge event bus:
+// MinecraftForge.EVENT_BUS.register(new MyEventHandler());
+```
+
 ## Config
 In version `1.2.*` or later, you can customize this mod's behavior via [Forge's server side config](https://docs.minecraftforge.net/en/1.20.1/misc/config/#registering-a-configuration).
 

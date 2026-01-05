@@ -38,11 +38,22 @@ abstract class CounterStrikeGrenadeEntity(
     var lastHitEntity: UUID? = null
 
     // For client side rotation
-    private var xRotSpeed: Float = 0f
-    private var yRotSpeed: Float = 0f
-    private var zRotSpeed: Float = 0f
-    var zRot: Float = 0f
-    var zRotO: Float = 0f
+    private var customXRotSpeed: Float = 0f
+    private var customYRotSpeed: Float = 0f
+    private var customZRotSpeed: Float = 0f
+
+    var customXRot: Float = 0f
+    var customYRot: Float = 0f
+    var customZRot: Float = 0f
+    var customXRotO: Float = 0f
+    var customYRotO: Float = 0f
+    var customZRotO: Float = 0f
+
+    init {
+        if (pLevel.isClientSide) {
+            randomizeRotation()
+        }
+    }
 
     companion object {
         val speedAccessor: EntityDataAccessor<Float> =
@@ -58,13 +69,6 @@ abstract class CounterStrikeGrenadeEntity(
         this.entityData.define(speedAccessor, 0f)
         this.entityData.define(isLandedAccessor, false)
         this.entityData.define(isExplodedAccessor, false)
-    }
-
-    override fun shoot(x: Double, y: Double, z: Double, pVelocity: Float, pInaccuracy: Float) {
-        super.shoot(x, y, z, pVelocity, pInaccuracy)
-        if (level().isClientSide) {
-            randomizeRotation()
-        }
     }
 
     override fun onHitEntity(result: EntityHitResult) {
@@ -101,28 +105,35 @@ abstract class CounterStrikeGrenadeEntity(
             this.isNoGravity = true
         }
 
+        // New, more robust landing detection
+        if (!this.entityData.get(isLandedAccessor) && !this.entityData.get(isExplodedAccessor)) {
+            if (this.onGround() && this.deltaMovement.lengthSqr() < 0.01 * 0.01) {
+                this.entityData.set(isLandedAccessor, true)
+            }
+        }
+
         // Client-side rotation logic
         if (this.level().isClientSide) {
             val isLanded = this.entityData.get(isLandedAccessor)
             if (!isLanded && !this.entityData.get(isExplodedAccessor)) {
                 // In air: keep rotating
-                this.xRotO = this.xRot
-                this.yRotO = this.yRot
-                this.zRotO = this.zRot
+                this.customXRotO = this.customXRot
+                this.customYRotO = this.customYRot
+                this.customZRotO = this.customZRot
 
-                this.xRot = (this.xRot + xRotSpeed) % 360
-                this.yRot = (this.yRot + yRotSpeed) % 360
-                this.zRot = (this.zRot + zRotSpeed) % 360
+                this.customXRot = (this.customXRot + customXRotSpeed) % 360
+                this.customYRot = (this.customYRot + customYRotSpeed) % 360
+                this.customZRot = (this.customZRot + customZRotSpeed) % 360
 
                 // Air resistance
-                this.xRotSpeed *= 0.99f
-                this.yRotSpeed *= 0.99f
-                this.zRotSpeed *= 0.99f
+                this.customXRotSpeed *= 0.99f
+                this.customYRotSpeed *= 0.99f
+                this.customZRotSpeed *= 0.99f
             } else {
                 // On ground: stop rotation
-                this.xRotSpeed = 0f
-                this.yRotSpeed = 0f
-                this.zRotSpeed = 0f
+                this.customXRotSpeed = 0f
+                this.customYRotSpeed = 0f
+                this.customZRotSpeed = 0f
             }
         }
     }
@@ -205,9 +216,9 @@ abstract class CounterStrikeGrenadeEntity(
     }
 
     private fun randomizeRotation() {
-        this.xRotSpeed = (random.nextFloat() - 0.5f) * 40
-        this.yRotSpeed = (random.nextFloat() - 0.5f) * 40
-        this.zRotSpeed = (random.nextFloat() - 0.5f) * 40
+        this.customXRotSpeed = (random.nextFloat() - 0.5f) * 40
+        this.customYRotSpeed = (random.nextFloat() - 0.5f) * 40
+        this.customZRotSpeed = (random.nextFloat() - 0.5f) * 40
     }
 
     private fun bounce(direction: Direction, speedCoefficient: Float, frictionFactor: Float) {

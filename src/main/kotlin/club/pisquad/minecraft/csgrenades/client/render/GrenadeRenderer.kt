@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.client.renderer.texture.TextureAtlas
 import net.minecraft.client.resources.model.BakedModel // Import BakedModel
-import net.minecraft.client.resources.model.ModelManager // Import ModelManager
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
@@ -43,9 +42,9 @@ class GrenadeRenderer<T>(
         val itemStack = entity.getItem()
         if (!itemStack.isEmpty && entity is CounterStrikeGrenadeEntity) {
             // 使用 lerp (线性插值) 来平滑地获取实体在两帧之间的旋转角度
-            val visualYRot = Mth.lerp(partialTicks, entity.yRotO, entity.yRot)
-            val visualXRot = Mth.lerp(partialTicks, entity.xRotO, entity.xRot)
-            val visualZRot = Mth.lerp(partialTicks, entity.zRotO, entity.zRot)
+            val visualYRot = Mth.rotLerp(partialTicks, entity.customYRotO, entity.customYRot)
+            val visualXRot = Mth.rotLerp(partialTicks, entity.customXRotO, entity.customXRot)
+            val visualZRot = Mth.rotLerp(partialTicks, entity.customZRotO, entity.customZRot)
 
             // Translate the model to align its visual center with its physical center
             poseStack.translate(0.0, 0.125, 0.0)

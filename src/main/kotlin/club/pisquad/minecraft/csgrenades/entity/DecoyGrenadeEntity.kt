@@ -72,17 +72,17 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
             if (level().isClientSide) {
                 // Force-freeze rotation
                 if (!hasSavedFinalRotation) {
-                    finalXRot = this.xRot
-                    finalYRot = this.yRot
-                    finalZRot = this.zRot
+                    finalXRot = this.customXRot
+                    finalYRot = this.customYRot
+                    finalZRot = this.customZRot
                     hasSavedFinalRotation = true
                 }
-                this.xRot = finalXRot
-                this.yRot = finalYRot
-                this.zRot = finalZRot
-                this.xRotO = finalXRot
-                this.yRotO = finalYRot
-                this.zRotO = finalZRot
+                this.customXRot = finalXRot
+                this.customYRot = finalYRot
+                this.customZRot = finalZRot
+                this.customXRotO = finalXRot
+                this.customYRotO = finalYRot
+                this.customZRotO = finalZRot
 
                 // Client-side sound playing
                 val currentCounter = this.entityData.get(SOUND_COUNTER_ACCESSOR)
