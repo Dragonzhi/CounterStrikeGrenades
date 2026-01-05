@@ -1,3 +1,9 @@
+<div align="right">
+
+[English](README.md)
+
+</div>
+
 <p align="center"><img src="assets/CounterStrikeGrenadesBanner.png" width="500" height="250"></p>
 
 <div align="center">
