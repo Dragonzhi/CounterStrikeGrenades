@@ -42,9 +42,9 @@ class GrenadeRenderer<T>(
         val itemStack = entity.getItem()
         if (!itemStack.isEmpty && entity is CounterStrikeGrenadeEntity) {
             // 使用 lerp (线性插值) 来平滑地获取实体在两帧之间的旋转角度
-            val visualYRot = Mth.lerp(partialTicks, entity.customYRotO, entity.customYRot)
-            val visualXRot = Mth.lerp(partialTicks, entity.customXRotO, entity.customXRot)
-            val visualZRot = Mth.lerp(partialTicks, entity.customZRotO, entity.customZRot)
+            val visualYRot = Mth.rotLerp(partialTicks, entity.customYRotO, entity.customYRot)
+            val visualXRot = Mth.rotLerp(partialTicks, entity.customXRotO, entity.customXRot)
+            val visualZRot = Mth.rotLerp(partialTicks, entity.customZRotO, entity.customZRot)
 
             // Translate the model to align its visual center with its physical center
             poseStack.translate(0.0, 0.125, 0.0)
