@@ -68,21 +68,14 @@ jobs:
           channel: beta
       
       - name: Publish to CurseForge
-        uses: Kir-Skay/publish-curseforge@v1.1.1
+        uses: itsmeow/curseforge-upload@v3.1.2
         with:
-          # CurseForge 的 API Token
           api-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          # 你的项目 ID (在 CurseForge 项目页面的右侧边栏可以找到)
           project-id: '1413459'
-          # 发布渠道: release, beta, 或 alpha
           release-type: 'beta'
-          # 游戏版本
           game-versions: '1.20.1'
-          # 对应的 Loader
           loaders: 'forge'
-          # 文件路径
           files: ${{ steps.prepare_artifact.outputs.artifact_path }}
-          # 更新日志
           changelog: ${{ steps.changelog.outputs.changes }}
           dependencies: |
             kotlin-for-forge(required)
