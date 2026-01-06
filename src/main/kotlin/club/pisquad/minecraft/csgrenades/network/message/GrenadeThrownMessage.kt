@@ -56,9 +56,11 @@ class GrenadeThrownMessage(
             val grenadeEntity = entityType.create(serverLevel) ?: return
             grenadeEntity.owner = context.sender?.level()?.getPlayerByUUID(msg.ownerUUID)
 
-            // Pass custom sound from message to decoy entity
-            if (grenadeEntity is club.pisquad.minecraft.csgrenades.entity.DecoyGrenadeEntity && !msg.customSound.isNullOrBlank()) {
-                grenadeEntity.setCustomSound(msg.customSound)
+            if (grenadeEntity is club.pisquad.minecraft.csgrenades.entity.DecoyGrenadeEntity) {
+                grenadeEntity.findAndSetTaczGunIdOnThrow()
+                if (!msg.customSound.isNullOrBlank()) {
+                    grenadeEntity.setCustomSound(msg.customSound)
+                }
             }
 
             grenadeEntity.setPos(msg.position)

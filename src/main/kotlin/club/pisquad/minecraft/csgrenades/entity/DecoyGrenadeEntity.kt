@@ -99,9 +99,6 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
                 if (activationTick == null) {
                     // First tick on the ground, activate the decoy
                     activationTick = this.tickCount
-                    if (ModList.get().isLoaded("tacz")) {
-                        findAndSetTaczGunId()
-                    }
                     scheduleNextSound()
                 } else {
                     // Logic for when the decoy is active
@@ -129,7 +126,10 @@ class DecoyGrenadeEntity(pEntityType: EntityType<out ThrowableItemProjectile>, p
         }
     }
 
-    private fun findAndSetTaczGunId() {
+    fun findAndSetTaczGunIdOnThrow() {
+        if (!ModList.get().isLoaded("tacz")) {
+            return
+        }
         val owner = this.owner
         if (owner is Player) {
             for (itemStack in owner.inventory.items) {
