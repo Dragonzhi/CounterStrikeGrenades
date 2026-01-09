@@ -25,6 +25,7 @@ object TrajectoryRenderer {
 
     private const val SIMULATION_TICKS = 150
     private const val GRAVITY = 0.03f
+    private const val AIR_DRAG = 0.99f
     private const val REST_THRESHOLD_SQR = 0.0025 // (0.05)^2
 
     private const val BOUNCE_SPEED_COEFFICIENT = 0.7f
@@ -139,6 +140,7 @@ object TrajectoryRenderer {
 
             position = nextPosition
             velocity = velocity.add(0.0, -GRAVITY.toDouble(), 0.0)
+            velocity = velocity.scale(AIR_DRAG.toDouble())
             pathPoints.add(position)
         }
 
@@ -155,10 +157,23 @@ object TrajectoryRenderer {
         val bufferSource = mc.renderBuffers().bufferSource()
         val vertexConsumer = bufferSource.getBuffer(RenderType.lineStrip())
 
+        val (r, g, b) = try {
+            val hex = ModConfig.TRAJECTORY_PREVIEW_COLOR.get()
+            val cleanHex = hex.removePrefix("#")
+            val colorInt = cleanHex.toInt(16)
+            val red = (colorInt shr 16 and 0xFF) / 255.0f
+            val green = (colorInt shr 8 and 0xFF) / 255.0f
+            val blue = (colorInt and 0xFF) / 255.0f
+            Triple(red, green, blue)
+        } catch (e: Exception) {
+            CounterStrikeGrenades.Logger.warn("Invalid trajectory preview color format. Using default white.")
+            Triple(1.0f, 1.0f, 1.0f) // Default to white
+        }
+
         val matrix = poseStack.last().pose()
         for (point in pathPoints) {
             vertexConsumer.vertex(matrix, point.x.toFloat(), point.y.toFloat(), point.z.toFloat())
-                .color(1.0f, 1.0f, 1.0f, 0.8f)
+                .color(r, g, b, 0.8f)
                 .normal(0.0f, 1.0f, 0.0f)
                 .endVertex()
         }
