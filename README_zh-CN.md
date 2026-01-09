@@ -147,6 +147,8 @@ throw_type_transient_time = 1000
 fov_effect_amount = 0.12
 #是否对玩家以外的生物造成伤害
 damage_non_player_entity = true
+#手榴弹轨迹预览线的颜色，格式为#RRGGBB十六进制。
+trajectory_preview_color = "#FF4444"
 
 [SmokeGrenade]
 	#烟雾半径，单位为方块
