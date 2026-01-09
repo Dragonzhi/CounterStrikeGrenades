@@ -33,6 +33,7 @@ object ThrowActionHandler {
     private var throwSpeedTransientTarget: Double? = null
     private var throwSpeedTransientOrigin: Double? = null
     var currentThrowSpeed: Double? = null
+    var chargeStartTime: Instant? = null
     private var transientBeginTime: Instant = Instant.now()
     private var previousSlot = -1
     private var screenOpened = false
@@ -78,6 +79,9 @@ object ThrowActionHandler {
             ) {
                 when (Pair(this.primaryButtonPressed, this.secondaryButtonPressed)) {
                     Pair(false, false) -> {
+                        if (primaryButtonPressed || secondaryButtonPressed) {
+                            this.chargeStartTime = Instant.now()
+                        }
                         when (Pair(primaryButtonPressed, secondaryButtonPressed)) {
                             Pair(true, true) -> {
                                 this.setNewTransientTarget(
@@ -165,6 +169,7 @@ object ThrowActionHandler {
         this.currentThrowSpeed = null
         this.throwSpeedTransientTarget = null
         this.throwSpeedTransientOrigin = null
+        this.chargeStartTime = null
     }
 
     private fun setNewTransientTarget(speedTarget: Double, speedOrigin: Double?) {

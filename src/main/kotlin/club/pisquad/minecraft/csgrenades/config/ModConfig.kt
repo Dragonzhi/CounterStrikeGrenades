@@ -17,6 +17,7 @@ object ModConfig {
     var THROW_TYPE_TRANSIENT_TIME: ForgeConfigSpec.IntValue
     var FOV_EFFECT_AMOUNT: ForgeConfigSpec.DoubleValue
     var DAMAGE_NON_PLAYER_ENTITY: ForgeConfigSpec.BooleanValue
+    lateinit var TRAJECTORY_PREVIEW_COLOR: ForgeConfigSpec.ConfigValue<String>
 
     object SmokeGrenade {
         lateinit var SMOKE_RADIUS: ForgeConfigSpec.IntValue
@@ -70,6 +71,8 @@ object ModConfig {
 //      Common configs
         builder.comment("Should grenade entities fly through barrier block?")
         IGNORE_BARRIER_BLOCK = builder.define("ignore_barrier_block", false)
+        builder.comment("The color of the grenade trajectory preview line, in #RRGGBB hex format.")
+        TRAJECTORY_PREVIEW_COLOR = builder.define("trajectory_preview_color", "#FFFFFF")
 //      GRENADE_ENTITY_SIZE = builder.defineInRange("grenade_entity_size", 0.3, 0.1, 10.0)
         builder.comment("Throw cooldown, in milliseconds")
         GRENADE_THROW_COOLDOWN = builder.defineInRange("grenade_throw_cooldown", 1000, 0, 60 * 1000)
